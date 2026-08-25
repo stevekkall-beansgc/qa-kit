@@ -135,6 +135,17 @@ def backups():
             out.append(("DB offsite (GCS)", "no timestamped objects found", False))
     except Exception as e:
         out.append(("DB offsite (GCS)", str(e)[:60], False))
+    # 4. restore drill (scheduled e2e proof backups are restorable)
+    try:
+        d = json.loads((Path.home() / "agency/logs/restore-drill.json").read_text())
+        when = datetime.strptime(d["when"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        age_h = int((datetime.now(timezone.utc) - when).total_seconds() // 3600)
+        modes = "/".join(m for m in ("local", "offsite") if (d.get(m) or {}).get("ok"))
+        fresh = age_h <= 48  # job runs daily; tolerance covers missed slots
+        out.append(("Restore drill", f"{modes or 'no'} path(s) · {age_h}h ago",
+                    bool(d.get("overall")) and fresh))
+    except Exception as e:
+        out.append(("Restore drill", f"no result: {str(e)[:40]}", False))
     return out
 
 
