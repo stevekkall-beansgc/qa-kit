@@ -1,0 +1,50 @@
+{
+  "when": "20260825T104352Z",
+  "results": [
+    {
+      "repo": "beanfit-app",
+      "kind": "unit",
+      "ok": true,
+      "secs": 0.2,
+      "tail": "t'\n  ...\n# Subtest: catalog and surfaces stay stable\nok 38 - catalog and surfaces stay stable\n  ---\n  duration_ms: 0.211167\n  type: 'test'\n  ...\n# Subtest: createStore exposes every repository (regression: identities was missing)\nok 39 - createStore exposes every repository (regression: identities was missing)\n  ---\n  duration_ms: 0.609208\n  type: 'test'\n  ...\n# Subtest: pendingByCode encodes the whole pairing-liveness rule in SQL\nok 40 - pendingByCode encodes the whole pairing-liveness rule in SQL\n  ---\n  duration_ms: 0.694833\n  type: 'test'\n  ...\n# Subtest: approve claims token atomically under the pending guard\nok 41 - approve claims token atomically under the pending guard\n  ---\n  duration_ms: 0.094\n  type: 'test'\n  ...\n# Subtest: setRawToken/setLastSeen are gone (approval is one statement)\nok 42 - setRawToken/setLastSeen are gone (approval is one statement)\n  ---\n  duration_ms: 0.051292\n  type: 'test'\n  ...\n# Subtest: createWithIdentity batches user+identity inserts\nok 43 - createWithIdentity batches user+identity inserts\n  ---\n  duration_ms: 0.138583\n  type: 'test'\n  ...\n1..43\n# tests 43\n# suites 0\n# pass 43\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 90.33425"
+    },
+    {
+      "repo": "beanfit",
+      "kind": "unit",
+      "ok": true,
+      "secs": 0.1,
+      "tail": "........................../Users/stephenkall/beans/products/beanfit/tests/test_register.py:32: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/20/kj7t9pzj11j9750__pkq01vm0000gn/T/tmp7tfq1fip/sub/device.json' mode='r' encoding='UTF-8'>\n  doc = json.loads(open(path).read())\nResourceWarning: Enable tracemalloc to get the object allocation traceback\n......\n----------------------------------------------------------------------\nRan 32 tests in 0.003s\n\nOK"
+    },
+    {
+      "repo": "agency",
+      "kind": "unit",
+      "ok": true,
+      "secs": 9.1,
+      "tail": "........................................................................ [ 45%]\n........................................................................ [ 91%]\n..............                                                           [100%]\n=============================== warnings summary ===============================\ntests/test_api_contract.py::TestHealth::test_health_shape\n  /Users/stephenkall/agency/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n158 passed, 1 warning in 8.92s"
+    },
+    {
+      "repo": "bean-sched",
+      "kind": "unit",
+      "ok": true,
+      "secs": 0.1,
+      "tail": "...................\n----------------------------------------------------------------------\nRan 19 tests in 0.014s\n\nOK"
+    },
+    {
+      "repo": "model-harness",
+      "kind": "unit",
+      "ok": true,
+      "secs": 0.0,
+      "tail": "...\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK"
+    }
+  ],
+  "planned_skipped": [
+    {
+      "repo": "beanmind",
+      "gap": "scripts have zero tests; recall/capture/index_mind need unit pins (entry-format module unblocks)"
+    },
+    {
+      "repo": "skillz",
+      "gap": "tool_scan/check_tiers/validate lack tests"
+    }
+  ]
+}

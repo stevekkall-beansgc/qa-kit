@@ -1,0 +1,22 @@
+{
+  "when": "20260825T104410Z",
+  "results": [
+    {
+      "repo": "beanfit-app",
+      "kind": "e2e",
+      "ok": true,
+      "secs": 9.8,
+      "tail": "> test:e2e\n> bash scripts/e2e-local.sh\n\n== 1. signup e2e-1787654644@test.local\nsignup: 303 -> http://127.0.0.1:8787/dashboard\n== 2. start beanfit register (isolated HOME)\npairing code from CLI: MSSCHAXM\n== 3. confirm page renders device\nconfirm page OK\n== 4. approve\napprove: 200\n== 5. CLI exited 0 (approved)\ncredential file OK: ['device_id', 'device_token', 'registered_at', 'server']\n== 6. dashboard lists the device\n== 7. configurator honors surfaces (regression: interface/surfaces seam)\nconfigurator surface OK (non-webui content present)\npersisted stack renders OK\n== 8. OAuth cancel page keeps the Google button (passwordless lockout guard)\noauth error path keeps SSO button OK\nE2E PASS"
+    }
+  ],
+  "planned_skipped": [
+    {
+      "repo": "beanmind",
+      "gap": "scripts have zero tests; recall/capture/index_mind need unit pins (entry-format module unblocks)"
+    },
+    {
+      "repo": "skillz",
+      "gap": "tool_scan/check_tiers/validate lack tests"
+    }
+  ]
+}
