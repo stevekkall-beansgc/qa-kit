@@ -177,8 +177,7 @@
       "unit": {
         "cmd": [
           "bash",
-          "-lc",
-          "python3 bin/check_docs.py && python3 bin/check_standards.py"
+          "bin/qa_selfcheck.sh"
         ]
       },
       "e2e": {
