@@ -15,6 +15,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+import shutil
+GH_BIN = shutil.which("gh") or "/opt/homebrew/bin/gh"  # launchd PATH lacks homebrew
+
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
 PUBLIC = HERE / "public"
@@ -36,7 +39,7 @@ def probe_url(url, timeout=3):
 
 def gh(args):
     try:
-        p = subprocess.run(["gh", *args], capture_output=True, text=True, timeout=30)
+        p = subprocess.run([GH_BIN, *args], capture_output=True, text=True, timeout=30)
         return json.loads(p.stdout) if p.returncode == 0 else None
     except Exception:
         return None

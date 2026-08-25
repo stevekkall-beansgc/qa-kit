@@ -17,6 +17,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import shutil
+GH_BIN = shutil.which("gh") or "/opt/homebrew/bin/gh"  # launchd PATH lacks homebrew
+
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
 STATE = HERE / "logs" / "ci-state.json"
@@ -29,7 +32,7 @@ def expand(p):
 
 def gh(args):
     try:
-        p = subprocess.run(["gh", *args], capture_output=True, text=True,
+        p = subprocess.run([GH_BIN, *args], capture_output=True, text=True,
                            timeout=30)
         return p.returncode, p.stdout.strip()
     except (FileNotFoundError, subprocess.TimeoutExpired) as e:
