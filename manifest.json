@@ -176,8 +176,9 @@
       "status": "unit-only",
       "unit": {
         "cmd": [
-          "python3",
-          "bin/check_docs.py"
+          "bash",
+          "-lc",
+          "python3 bin/check_docs.py && python3 bin/check_standards.py"
         ]
       },
       "e2e": {
