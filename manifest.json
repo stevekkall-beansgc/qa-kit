@@ -60,7 +60,7 @@
       "status": "unit-only",
       "unit": {
         "cmd": [
-          "python3",
+          ".venv/bin/python",
           "-m",
           "pytest",
           "tests",
@@ -73,12 +73,9 @@
       },
       "setup": {
         "cmd": [
-          "python3",
-          "-m",
-          "pip",
-          "install",
-          "--quiet",
-          "pytest"
+          "bash",
+          "-lc",
+          "test -x .venv/bin/python || python3 -m venv .venv; .venv/bin/python -m pip install --quiet pytest"
         ]
       }
     },
