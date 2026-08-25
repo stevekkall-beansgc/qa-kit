@@ -1,61 +1,164 @@
 {
   "version": 1,
-  "description": "BeanLabs QA manifest — single source of truth for what is tested, how, and where. E2E bodies live in their owning repos; this file only registers entrypoints.",
-  "tiers": { "A": "user-facing product code", "B": "operational tooling", "C": "docs/meta" },
+  "description": "BeanLabs QA manifest \u2014 single source of truth for what is tested, how, and where. E2E bodies live in their owning repos; this file only registers entrypoints.",
+  "tiers": {
+    "A": "user-facing product code",
+    "B": "operational tooling",
+    "C": "docs/meta"
+  },
   "repos": [
     {
       "name": "beanfit-app",
       "path": "~/beans/products/beanfit-app",
       "tier": "A",
       "status": "active",
-      "unit": { "cmd": ["npm", "test"] },
-      "e2e": { "cmd": ["npm", "run", "test:e2e"], "services": ["wrangler dev --local", "local D1 schema+migrations"] }
+      "unit": {
+        "cmd": [
+          "npm",
+          "test"
+        ]
+      },
+      "e2e": {
+        "cmd": [
+          "npm",
+          "run",
+          "test:e2e"
+        ],
+        "services": [
+          "wrangler dev --local",
+          "local D1 schema+migrations"
+        ]
+      }
     },
     {
       "name": "beanfit",
       "path": "~/beans/products/beanfit",
       "tier": "A",
       "status": "active",
-      "unit": { "cmd": ["python3", "-m", "unittest", "discover", "-s", "tests"], "env": { "PYTHONPATH": "src" } },
-      "e2e": { "note": "pairing flow owned by beanfit-app e2e (drives this CLI)", "cmd": null }
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "env": {
+          "PYTHONPATH": "src"
+        }
+      },
+      "e2e": {
+        "note": "pairing flow owned by beanfit-app e2e (drives this CLI)",
+        "cmd": null
+      }
     },
     {
       "name": "agency",
       "path": "~/agency",
       "tier": "A",
       "status": "unit-only",
-      "unit": { "cmd": [".venv/bin/python", "-m", "pytest", "tests", "-q"] },
-      "e2e": { "note": "runner-flow e2e deferred to post-migration batch C", "cmd": null }
+      "unit": {
+        "cmd": [
+          ".venv/bin/python",
+          "-m",
+          "pytest",
+          "tests",
+          "-q"
+        ]
+      },
+      "e2e": {
+        "note": "runner-flow e2e deferred to post-migration batch C",
+        "cmd": null
+      }
     },
     {
       "name": "bean-sched",
       "path": "~/Desktop/bean-sched",
       "tier": "B",
       "status": "active",
-      "unit": { "cmd": ["python3", "-m", "unittest", "test_sched"] },
-      "e2e": { "note": "live-tick observation is operational (launchd); flock-bypass e2e lands with last_slot work", "cmd": null }
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "test_sched"
+        ]
+      },
+      "e2e": {
+        "note": "live-tick observation is operational (launchd); flock-bypass e2e lands with last_slot work",
+        "cmd": null
+      }
     },
     {
       "name": "model-harness",
       "path": "~/Desktop/BeanLabs/model-harness",
       "tier": "B",
       "status": "active",
-      "unit": { "cmd": ["python3", "-m", "unittest", "discover", "tests"] },
-      "e2e": { "note": "benchmark loop requires live LM Studio; validated operationally via nightly chain", "cmd": null }
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "tests"
+        ]
+      },
+      "e2e": {
+        "note": "benchmark loop requires live LM Studio; validated operationally via nightly chain",
+        "cmd": null
+      }
     },
     {
       "name": "beanmind",
       "path": "~/beans/mind/beanmind",
       "tier": "B",
-      "status": "planned",
-      "gap": "scripts have zero tests; recall/capture/index_mind need unit pins (entry-format module unblocks)"
+      "status": "active",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-t",
+          "."
+        ]
+      },
+      "e2e": {
+        "note": "semantic-index live check is operational (LM Studio/Qdrant)",
+        "cmd": null
+      }
     },
     {
       "name": "skillz",
       "path": "~/beans/catalog/skillz",
       "tier": "B",
+      "status": "active",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-t",
+          "."
+        ]
+      },
+      "e2e": {
+        "note": "monthly scan is operational; quarantine machinery lives in check_tiers",
+        "cmd": null
+      }
+    },
+    {
+      "name": "BeanLabs",
+      "path": "~/Desktop/BeanLabs",
+      "tier": "C",
       "status": "planned",
-      "gap": "tool_scan/check_tiers/validate lack tests"
+      "gap": "auto-detected by reconcile.py --fix; needs entrypoints + review"
     }
   ]
 }

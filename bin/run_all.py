@@ -62,6 +62,29 @@ def run_repo(repo, kind):
             "secs": round(time.monotonic() - t0, 1), "tail": out.strip()}
 
 
+def check_docs(repo):
+    """Docs standard v1: README + AGENTS.md present, sections consistent."""
+    root = expand(repo["path"])
+    ag = root / "AGENTS.md"
+    rd = root / "README.md"
+    t0 = time.monotonic()
+    problems = []
+    if not ag.exists():
+        problems.append("missing AGENTS.md")
+    else:
+        ag_text = ag.read_text()
+        if "## Test commands" not in ag_text:
+            problems.append("AGENTS.md lacks Test commands section")
+        cmd = (repo.get("unit") or {}).get("cmd")
+        if cmd and " ".join(cmd) not in ag_text.replace("`", ""):
+            problems.append("AGENTS.md does not state manifest unit cmd")
+    if rd.exists() and "AGENTS.md" not in rd.read_text():
+        problems.append("README does not reference AGENTS.md")
+    return {"repo": repo["name"], "kind": "docs", "ok": not problems,
+            "secs": round(time.monotonic() - t0, 2),
+            "tail": "; ".join(problems)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--e2e", action="store_true")
@@ -81,6 +104,7 @@ def main():
             skipped.append({"repo": repo["name"],
                             "gap": repo.get("gap", "no entrypoint registered")})
             continue
+        results.append(check_docs(repo))
         for kind in kinds:
             r = run_repo(repo, kind)
             if r:
