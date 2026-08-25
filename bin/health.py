@@ -105,8 +105,12 @@ def ci_rows():
             rows.append((name, "no runs", "", True))
             continue
         r = runs[0]
-        ok = r.get("conclusion") == "success"
-        rows.append((name, r.get("conclusion") or r.get("displayTitle", "")[:40],
+        conclusion = r.get("conclusion") or ""
+        if conclusion in ("running", "queued"):
+            ok = True  # in-flight is not failing; render neutral
+        else:
+            ok = conclusion == "success"
+        rows.append((name, conclusion or r.get("displayTitle", "")[:40],
                      r.get("url", ""), ok))
     return rows
 
@@ -136,14 +140,17 @@ def monitors():
 
 
 def html(data):
-    def dot(ok):
-        return f'<span class="d {"g" if ok else "r"}"></span>'
+    def dot(ok, neutral=False):
+        cls = "y" if neutral else ("g" if ok else "r")
+        return f'<span class="d {cls}"></span>'
     svc = "".join(f"<tr><td>{dot(ok)}</td><td>{n}</td><td class=m>{detail}</td></tr>"
                   for n, detail, ok in data["services"])
     repos = "".join(
-        f'<tr><td>{dot(ok)}</td><td><a href="{url}" target="_blank">{n}</a></td>'
+        f'<tr><td>{dot(ok, neutral=state in ("running", "queued"))}</td>'
+        f'<td><a href="{url}" target="_blank">{n}</a></td>'
         f"<td>{state}</td></tr>" if url else
-        f'<tr><td>{dot(ok)}</td><td>{n}</td><td>{state}</td></tr>'
+        f'<tr><td>{dot(ok, neutral=state in ("running", "queued"))}</td>'
+        f'<td>{n}</td><td>{state}</td></tr>'
         for n, state, url, ok in data["repos"])
     q = data["qa"]
     mon = data["monitors"]
@@ -154,7 +161,7 @@ margin:0;padding:24px}}h1{{font-size:1.3rem}} h2{{font-size:1rem;margin:22px 0 8
 color:#9aa4af;text-transform:uppercase;letter-spacing:.08em;font-size:.75rem}}
 table{{border-collapse:collapse;width:100%;max-width:720px}} td{{padding:6px 10px;
 border-bottom:1px solid #232a33}} .m{{color:#667085}} .d{{display:inline-block;
-width:10px;height:10px;border-radius:50%}} .g{{background:#34d399}} .r{{background:#f87171}}
+width:10px;height:10px;border-radius:50%}} .g{{background:#34d399}} .r{{background:#f87171}} .y{{background:#fbbf24}}
 a{{color:#7dd3fc;text-decoration:none}} .sub{{color:#667085;font-size:.85rem}}</style></head><body>
 <h1>BeanLabs fleet health</h1>
 <p class="sub">generated {data['generated']} · refreshes every 5 min</p>
