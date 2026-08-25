@@ -55,7 +55,7 @@
     },
     {
       "name": "agency",
-      "path": "~/agency",
+      "path": "~/beans/platform/agency",
       "tier": "A",
       "status": "unit-only",
       "unit": {
@@ -81,7 +81,7 @@
     },
     {
       "name": "bean-sched",
-      "path": "~/Desktop/bean-sched",
+      "path": "~/beans/platform/bean-sched",
       "tier": "B",
       "status": "active",
       "unit": {
@@ -99,7 +99,7 @@
     },
     {
       "name": "model-harness",
-      "path": "~/Desktop/BeanLabs/model-harness",
+      "path": "~/beans/labs/model-harness",
       "tier": "B",
       "status": "active",
       "unit": {
@@ -164,7 +164,7 @@
     },
     {
       "name": "BeanLabs",
-      "path": "~/Desktop/BeanLabs",
+      "path": "~/beans/labs/beanlabs",
       "tier": "C",
       "status": "planned",
       "gap": "auto-detected by reconcile.py --fix; needs entrypoints + review"

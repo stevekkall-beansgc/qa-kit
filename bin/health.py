@@ -72,7 +72,7 @@ def services():
 
     tick, tick_ok = "never", False
     try:
-        state_dir = Path.home() / "Desktop/bean-sched/state"
+        state_dir = Path.home() / "beans/platform/bean-sched/state"
         candidates = [state_dir / "state.json", state_dir / "history.json"]
         mtimes = [f.stat().st_mtime for f in candidates if f.exists()]
         if mtimes:
@@ -93,13 +93,13 @@ def backups():
     # 1. local replica freshness (litestream layer)
     # Healthy = segments keep pace with ACTUAL db writes — a quiet hour is not
     # a failure, so compare against agency.db-wal mtime (5-min slack).
-    replica = Path.home() / "agency/replica"
+    replica = Path.home() / "beans/platform/agency/replica"
     try:
         mtimes = [f.stat().st_mtime for f in replica.rglob("*.ltx")]
         if not mtimes:
             raise FileNotFoundError("no .ltx segments")
         seg_age_min = int((datetime.now(timezone.utc).timestamp() - max(mtimes)) // 60)
-        wal = Path.home() / "agency/agency.db-wal"
+        wal = Path.home() / "beans/platform/agency/agency.db-wal"
         write_age_min = (int((datetime.now(timezone.utc).timestamp() - wal.stat().st_mtime) // 60)
                          if wal.exists() else 999999)
         lag_min = seg_age_min - write_age_min  # how far replication trails writes
@@ -137,7 +137,7 @@ def backups():
         out.append(("DB offsite (GCS)", str(e)[:60], False))
     # 4. restore drill (scheduled e2e proof backups are restorable)
     try:
-        d = json.loads((Path.home() / "agency/logs/restore-drill.json").read_text())
+        d = json.loads((Path.home() / "beans/platform/agency/logs/restore-drill.json").read_text())
         when = datetime.strptime(d["when"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         age_h = int((datetime.now(timezone.utc) - when).total_seconds() // 3600)
         modes = "/".join(m for m in ("local", "offsite") if (d.get(m) or {}).get("ok"))
@@ -148,7 +148,7 @@ def backups():
         out.append(("Restore drill", f"no result: {str(e)[:40]}", False))
     # 5. full-runbook rehearsal doctor (quarterly)
     try:
-        d = json.loads((Path.home() / "agency/logs/runbook-doctor.json").read_text())
+        d = json.loads((Path.home() / "beans/platform/agency/logs/runbook-doctor.json").read_text())
         when = datetime.strptime(d["when"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         age_d = int((datetime.now(timezone.utc) - when).total_seconds() // 86400)
         out.append(("Runbook rehearsal",
