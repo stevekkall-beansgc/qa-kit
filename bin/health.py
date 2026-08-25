@@ -146,6 +146,16 @@ def backups():
                     bool(d.get("overall")) and fresh))
     except Exception as e:
         out.append(("Restore drill", f"no result: {str(e)[:40]}", False))
+    # 5. full-runbook rehearsal doctor (quarterly)
+    try:
+        d = json.loads((Path.home() / "agency/logs/runbook-doctor.json").read_text())
+        when = datetime.strptime(d["when"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        age_d = int((datetime.now(timezone.utc) - when).total_seconds() // 86400)
+        out.append(("Runbook rehearsal",
+                    f"{d.get('passed', '?')} checks · {d.get('failed', '?')} failed · {age_d}d ago",
+                    bool(d.get("overall")) and age_d <= 100))
+    except Exception as e:
+        out.append(("Runbook rehearsal", f"no result: {str(e)[:40]}", False))
     return out
 
 
