@@ -41,7 +41,8 @@ def main():
     state = {}
     if STATE.exists():
         try:
-            state = json.loads(STATE.read_text())
+            wrapper = json.loads(STATE.read_text())
+            state = wrapper.get("repos", {})
         except ValueError:
             state = {}
 
