@@ -1,78 +1,74 @@
-# BeanLabs Engineering Standards — Master Index
+# BeanLabs Engineering Standards — Kernels
 
-**This file is the entry point.** Every standard, loop, and enforcement
-mechanism is listed here with its source of truth. If something isn't
-reachable from this file, it isn't a standard yet.
+**Rule of this file:** one imperative per standard, then link out. Full
+requirements live at the link — never duplicate them here. If a standard
+has no home yet, it gets a home before it gets a kernel line.
 
 Owner repo: `qa-kit` · Binding on every session, human or agent.
-Last amended: 2026-08-25
+Amended: 2026-08-25
 
 ---
 
-## 1. The four maintenance loops (automatic)
+## Maintenance loops (automatic)
 
-| Loop | Cadence | What it catches | Where |
+| Loop | Cadence | Catches | Kernel owner |
 |---|---|---|---|
-| **Compliance gates** | every push / PR | docs standard violations, broken units, failing e2e | `gate-kit` workflow, per-repo `.github/workflows/gate.yml` |
-| **CI monitor** | hourly (`ci-monitor` job) | red runs on main, any repo | `qa-kit/bin/ci_monitor.py` → FAIL row on scheduler board |
-| **Fleet health** | 15 min (`fleet-health` job) | services down, tick lag, repo state | `/qa` pane (hub mount) + `qa-kit/bin/health.py` |
-| **Registry reconciler** | weekly Mon 07:13 (`qa-kit-reconcile` job) | unregistered repos, dead paths | `qa-kit/bin/reconcile.py` |
+| Compliance gates | every push/PR | docs, unit, e2e violations | [gate-kit](https://github.com/stevekkall-beansgc/gate-kit) |
+| CI monitor | hourly | red main, any repo | [bin/ci_monitor.py](bin/ci_monitor.py) |
+| Fleet health | 15 min | services down, tick lag | [bin/health.py](bin/health.py) → [/qa](/) |
+| Registry reconciler | weekly | unregistered repos, dead paths | [bin/reconcile.py](bin/reconcile.py) |
 
-Escalation path: gate red → PR blocked-by-policy · monitor red → scheduler
-board FAIL row · reconciler red → stub row + FAIL row · pane red → you.
+## Standards kernels
 
-## 2. The review contract (binding, 6 rules)
+**Review contract** — a change is done only when its tests exist and
+`run_all` is green; fixes ship failing-first; flows ship with owned e2e.
+→ Full 6 rules: [README.md §contract](README.md)
 
-Full text: [`qa-kit/README.md`](README.md). Summary:
+**Docs standard v1** — every repo carries `README.md` (human) +
+`AGENTS.md` (agent, with `## Test commands` matching the manifest
+entrypoint exactly). Enforced in every gate.
+→ Checker: [bin/check_docs.py](bin/check_docs.py)
 
-1. Bug fixes ship with a **failing-first regression test**. No exception.
-2. New user-facing flows ship with **in-repo unit tests + an owned e2e**,
-   registered in `manifest.json` before merge.
-3. **Done = `bin/run_all.py --only <repo> --all` green.**
-4. New repos register in `manifest.json` **and** `agency/repos.json` day one.
-5. Reviewer checklist: diff without tests → block; flow without manifest
-   row → block.
-6. `planned` repos graduate on next touch — never silently untested.
+**Registry law** — new repos register in `qa-kit/manifest.json` AND
+`agency/repos.json` on day one, with tier + entrypoints.
+→ Registry: [manifest.json](manifest.json)
 
-## 3. Docs standard v1 (every repo)
+**Graduation rule** — a `planned` row graduates to `active` on its next
+touch. Never silently untested.
+→ [manifest.json status field](manifest.json)
 
-Enforced by `qa-kit/bin/check_docs.py`, run automatically in every gate:
+**Gate semantics** — check names (`docs/setup/unit/e2e`) are the API;
+gates are advisory (Free tier); binding enforcement is at release.
+→ Platform constraints: [pr-gates-spec](../../../Desktop/BeanLabs/AUDIT-2026-08/research/pr-gates-spec.md)
 
-- `README.md` — human wiki; must reference AGENTS.md
-- `AGENTS.md` — agent wiki ([agents.md convention](https://agents.md)) with
-  required `## Test commands` section **stating the exact manifest
-  entrypoint** (drift between the two fails the gate)
-- Repo-specific guardrails + known-debt register live in each AGENTS.md
+**Release standard v1** — semver + annotated tag + pre-tag gates
+(clean tree, green CI, remote, audit) via `ag release` only.
+→ [agency/docs/RELEASE-STANDARD.md](../../../agency/docs/RELEASE-STANDARD.md)
 
-## 4. Gate tiers & check names
+**State machine truth** — task lifecycle edges live in exactly one table:
+`agency/server/db.py::TASK_TRANSITIONS` (conformance-tested; PATCH gating
+derives from it).
+→ [server/db.py](../../../agency/server/db.py)
 
-Registry: [`qa-kit/manifest.json`](manifest.json) — tier, status
-(`active`/`unit-only`/`planned`), exact entrypoints, per-repo `setup` hooks.
+**Surface contracts** — hub API/runner shapes are versioned; breaking a
+documented shape requires bumping `contracts/CONTRACTS.md`.
+→ [agency/contracts/CONTRACTS.md](../../../agency/contracts/CONTRACTS.md)
 
-| Tier | Repos | Gate checks |
-|---|---|---|
-| A (product) | beanfit-app, beanfit, agency | docs · setup · unit (+e2e for beanfit-app via `full: true`) |
-| B (tooling) | bean-sched, model-harness, beanmind, skillz, qa-kit, gate-kit | docs · unit |
-| C (docs/meta) | BeanLabs (planned stub) | none yet — graduates on next touch |
+**Layout law (ADR 0005)** — all repos under `~/beans/<group>/<repo>`;
+registered day one; no scratch outside sanctioned dirs.
+→ Enforced by `beanmind/scripts/check_layout.py`
 
-Check names are the API — never rename: `docs`, `setup`, `unit`, `e2e`.
-Gates are **advisory** (GitHub Free, private repos); binding enforcement =
-`ag release` at tag time. Real merge-blocking = Team plan decision (held).
+**Honesty rule (product)** — estimates ship uncertainty; catalog pins are
+measured, never guessed; no fantasy numbers on unsupported platforms.
+→ Per-repo detail: `beanfit/AGENTS.md`
 
-## 5. Related standards (source of truth lives elsewhere)
+**Health pane** — one glance answers: services up, repo CI state, QA
+baseline age, monitor coverage.
+→ Generator: [bin/health.py](bin/health.py) · served at hub `/qa`
 
-| Standard | Source of truth |
-|---|---|
-| Release standard v1 (semver, tags, pre-tag gates) | `agency/docs/RELEASE-STANDARD.md` + `agency/decisions/0004` |
-| Hub/runner surface contracts (v0.6) | `agency/contracts/CONTRACTS.md` |
-| Task lifecycle state machine | `agency/server/db.py::TASK_TRANSITIONS` (single source; conformance-tested) |
-| Workspace layout law (ADR 0005) | `beanmind/decisions/0005-*`, enforced by `beanmind/scripts/check_layout.py` |
-| Per-repo guardrails & known debt | each repo's `AGENTS.md` |
-| Audit methodology + findings register | `BeanLabs/AUDIT-2026-08/` (63 defects found; register closed 2026-08-25) |
-| PR-gate platform constraints (Free-tier limits, pricing) | `BeanLabs/AUDIT-2026-08/research/pr-gates-spec.md` |
+## Relative-path note
 
-## 6. Health pane
-
-`/qa` on the hub — services, per-repo latest CI, QA baseline, monitor state.
-Regenerated every 15 min by scheduler; machine JSON at `/qa/health.json`.
-Generator: `qa-kit/bin/health.py`.
+Links marked `../../../` resolve on disk (repo siblings under
+`~/beans/platform`); GitHub renders them from the qa-kit repo view only
+when the target repo is checked out beside it — use the disk for full
+navigation, or each repo's GitHub for its own standards.
