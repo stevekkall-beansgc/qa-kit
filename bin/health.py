@@ -164,6 +164,7 @@ border-bottom:1px solid #232a33}} .m{{color:#667085}} .d{{display:inline-block;
 width:10px;height:10px;border-radius:50%}} .g{{background:#34d399}} .r{{background:#f87171}} .y{{background:#fbbf24}}
 a{{color:#7dd3fc;text-decoration:none}} .sub{{color:#667085;font-size:.85rem}}</style></head><body>
 <h1>BeanLabs fleet health</h1>
+<p class="sub"><a href="https://github.com/stevekkall-beansgc/qa-kit/blob/main/STANDARDS.md">Standards & maintenance loops</a> · this pane regenerates every 15 min</p>
 <p class="sub">generated {data['generated']} · refreshes every 5 min</p>
 <h2>services</h2><table>{svc}</table>
 <h2>repositories · latest main-branch run</h2><table>{repos}</table>

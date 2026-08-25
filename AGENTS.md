@@ -1,5 +1,8 @@
 # AGENTS.md — qa-kit
 
+
+> **Entry point for all standards:** [STANDARDS.md](STANDARDS.md)
+
 Central QA orchestration. Test bodies live in the repos that own the code;
 this repo registers entrypoints, runs them uniformly, records verdicts.
 

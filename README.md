@@ -1,5 +1,8 @@
 # qa-kit — BeanLabs central QA orchestration
 
+
+> **Entry point for all standards:** [STANDARDS.md](STANDARDS.md)
+
 **Principle: test bodies live in the repo that owns the code. qa-kit only
 knows how to find them, run them, and record the verdict.**
 
