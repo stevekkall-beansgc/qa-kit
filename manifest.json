@@ -60,7 +60,7 @@
       "status": "unit-only",
       "unit": {
         "cmd": [
-          ".venv/bin/python",
+          "python3",
           "-m",
           "pytest",
           "tests",
@@ -70,6 +70,16 @@
       "e2e": {
         "note": "runner-flow e2e deferred to post-migration batch C",
         "cmd": null
+      },
+      "setup": {
+        "cmd": [
+          "python3",
+          "-m",
+          "pip",
+          "install",
+          "--quiet",
+          "pytest"
+        ]
       }
     },
     {
@@ -159,6 +169,40 @@
       "tier": "C",
       "status": "planned",
       "gap": "auto-detected by reconcile.py --fix; needs entrypoints + review"
+    },
+    {
+      "name": "qa-kit",
+      "path": "~/beans/platform/qa-kit",
+      "tier": "B",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "bin/check_docs.py"
+        ]
+      },
+      "e2e": {
+        "note": "self-hosting: check_docs IS the smoke",
+        "cmd": null
+      }
+    },
+    {
+      "name": "gate-kit",
+      "path": "~/beans/platform/gate-kit",
+      "tier": "B",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "py_compile",
+          "bin/compliance.py"
+        ]
+      },
+      "e2e": {
+        "note": "activation e2e = first PR carrying the caller stub",
+        "cmd": null
+      }
     }
   ]
 }
