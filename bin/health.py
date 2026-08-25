@@ -85,6 +85,59 @@ def services():
     return out
 
 
+def backups():
+    """Backup-chain probes: litestream local replica, gcssync launchd job,
+    GCS offsite freshness. Exists because gcssync failed silently for days —
+    nothing else watched the watchmen of the offsite copy."""
+    out = []
+    # 1. local replica freshness (litestream layer)
+    # Healthy = segments keep pace with ACTUAL db writes — a quiet hour is not
+    # a failure, so compare against agency.db-wal mtime (5-min slack).
+    replica = Path.home() / "agency/replica"
+    try:
+        mtimes = [f.stat().st_mtime for f in replica.rglob("*.ltx")]
+        if not mtimes:
+            raise FileNotFoundError("no .ltx segments")
+        seg_age_min = int((datetime.now(timezone.utc).timestamp() - max(mtimes)) // 60)
+        wal = Path.home() / "agency/agency.db-wal"
+        write_age_min = (int((datetime.now(timezone.utc).timestamp() - wal.stat().st_mtime) // 60)
+                         if wal.exists() else 999999)
+        lag_min = seg_age_min - write_age_min  # how far replication trails writes
+        out.append(("DB replica (local)",
+                    f"segment {seg_age_min}m old · last db write {write_age_min}m ago",
+                    lag_min <= 5))
+    except Exception as e:
+        out.append(("DB replica (local)", str(e)[:60], False))
+    # 2. gcssync last exit status
+    uid = Path.home().name and subprocess.run(["id", "-u"], capture_output=True, text=True).stdout.strip()
+    p = subprocess.run(["/bin/launchctl", "print", f"gui/{uid}/com.agency.gcssync"],
+                       capture_output=True, text=True, timeout=10)
+    m = [ln for ln in p.stdout.splitlines() if "last exit code" in ln]
+    code = m[-1].split("=")[-1].strip() if m else "?"
+    out.append(("gcssync (launchd)", f"last exit {code}", code == "0"))
+    # 3. offsite freshness via gsutil (absolute interpreter pin — standing rule)
+    gsutil = shutil.which("gsutil") or "/opt/homebrew/bin/gsutil"
+    env = {"PATH": "/usr/bin:/bin:/opt/homebrew/bin",
+           "CLOUDSDK_PYTHON": "/opt/homebrew/bin/python3.12",
+           "HOME": str(Path.home())}
+    try:
+        r = subprocess.run([gsutil, "-q", "ls", "-lR",
+                            "gs://downtown-504818-agency-db/agency/ltx/"],
+                           capture_output=True, text=True, timeout=45, env=env)
+        stamps = [ln.split()[1] for ln in r.stdout.splitlines()
+                  if len(ln.split()) >= 2 and "T" in ln.split()[1] and "Z" in ln.split()[1]]
+        if stamps:
+            newest = max(stamps)
+            t = datetime.strptime(newest, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            age_h = int((datetime.now(timezone.utc) - t).total_seconds() // 3600)
+            out.append(("DB offsite (GCS)", f"newest object {age_h}h old", age_h <= 24))
+        else:
+            out.append(("DB offsite (GCS)", "no timestamped objects found", False))
+    except Exception as e:
+        out.append(("DB offsite (GCS)", str(e)[:60], False))
+    return out
+
+
 def ci_rows():
     man = json.loads(MANIFEST.read_text())
     rows = []
@@ -180,7 +233,7 @@ def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     data = {
         "generated": now,
-        "services": services(),
+        "services": services() + backups(),
         "repos": [(n, s, u, ok) for n, s, u, ok in ci_rows()],
         "qa": qa_baseline(),
         "monitors": monitors(),
