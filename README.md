@@ -53,3 +53,7 @@ Binding for every session, human or agent, effective 2026-08-24:
    own root.
 2. Append a row to `manifest.json` with the exact cmd array.
 3. Run `bin/run_all.py --only <name> --all` once; land it green.
+
+---
+
+**Agents:** see [AGENTS.md](AGENTS.md) before changing anything here.

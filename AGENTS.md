@@ -16,6 +16,10 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
 - One repo: `python3 bin/run_all.py --only beanfit-app --all`
 - Docs standard: `python3 bin/check_docs.py`
 
+## Test commands
+- Docs+manifest smoke: `python3 bin/check_docs.py`
+- Full sweep: `python3 bin/run_all.py --all`
+
 ## The contract (binding on every session, human or agent)
 1. Bug fixes ship with a failing-first regression test.
 2. New user-facing flows land with in-repo unit tests AND an owned e2e
