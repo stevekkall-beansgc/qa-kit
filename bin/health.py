@@ -26,9 +26,10 @@ def expand(p):
 
 
 def probe_url(url, timeout=3):
+    """Liveness: ANY http response (<500) proves something is serving."""
     try:
         with urllib.request.urlopen(url, timeout=timeout) as r:
-            return r.status == 200, ""
+            return r.status < 500, ""
     except Exception as e:
         return False, str(e)[:120]
 
@@ -55,10 +56,29 @@ def services():
         out.append(("Runner heartbeat", str(e)[:60], False))
     ok, _ = probe_url("http://127.0.0.1:6333/readyz")
     out.append(("Qdrant", ":6333", ok))
+    models = "-"
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:1234/v1/models", timeout=3) as r:
+            models = f"{len(json.loads(r.read()).get('data', []))} loaded"
+    except Exception:
+        pass
     ok, _ = probe_url("http://127.0.0.1:1234/v1/models")
-    out.append(("LM Studio", ":1234", ok))
+    out.append(("LM Studio", f":1234 · {models}", ok))
     ok, _ = probe_url("http://127.0.0.1:8766/api/status")
-    out.append(("Harness console", ":8766", ok))
+    out.append(("Harness console", ":8766 · benchmark lane", ok))
+
+    tick, tick_ok = "never", False
+    try:
+        state_dir = Path.home() / "Desktop/bean-sched/state"
+        candidates = [state_dir / "state.json", state_dir / "history.json"]
+        mtimes = [f.stat().st_mtime for f in candidates if f.exists()]
+        if mtimes:
+            age = max(0, int((datetime.now(timezone.utc).timestamp() - max(mtimes)) // 60))
+            tick = "just now" if age < 2 else f"{age}m ago"
+            tick_ok = age <= 10  # tick cadence is ~5 min
+    except Exception:
+        pass
+    out.append(("bean-sched tick", f"5-min cadence · last write {tick}", tick_ok))
     return out
 
 
