@@ -139,7 +139,8 @@
       "e2e": {
         "note": "semantic-index live check is operational (LM Studio/Qdrant)",
         "cmd": null
-      }
+      },
+      "github": "BeanMind"
     },
     {
       "name": "skillz",
@@ -161,7 +162,8 @@
       "e2e": {
         "note": "monthly scan is operational; quarantine machinery lives in check_tiers",
         "cmd": null
-      }
+      },
+      "github": "Bean-Skillz"
     },
     {
       "name": "BeanLabs",
