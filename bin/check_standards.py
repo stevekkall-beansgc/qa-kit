@@ -13,10 +13,30 @@ reconciler job.
 """
 import re
 import sys
+import os
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 STANDARDS = HERE / "STANDARDS.md"
+
+
+def workspace_root() -> Path:
+    """Return the canonical Bean Labs root used for cross-repo references."""
+    return Path(os.environ.get("BEAN_WORKSPACE_ROOT", str(Path.home() / "beans"))).expanduser()
+
+
+def resolve_target(rel: str) -> Path:
+    """Resolve a local link, falling back to the canonical workspace layout.
+
+    Isolated repo worktrees do not contain sibling repositories, but the
+    standards kernel intentionally links to those siblings. Keep local links
+    authoritative when available and make isolated checks deterministic by
+    resolving the same relative path from the canonical qa-kit location.
+    """
+    local = (HERE / rel).resolve()
+    if local.exists():
+        return local
+    return (workspace_root() / "platform" / "qa-kit" / rel).resolve()
 
 # kernel -> anchor that must exist for the kernel to be true
 ANCHORS = {
@@ -24,9 +44,9 @@ ANCHORS = {
     "Docs standard v1": ("bin/check_docs.py", "AGENTS.md"),
     "Registry law": ("manifest.json", '"repos"'),
     "Gate semantics": ("../gate-kit/bin/compliance.py", "advisory"),
-    "Release standard v1": ("../../../agency/docs/RELEASE-STANDARD.md", None),
-    "State machine truth": ("../../../agency/server/db.py", "TASK_TRANSITIONS"),
-    "Surface contracts": ("../../../agency/contracts/CONTRACTS.md", "CONTRACT_VERSION"),
+    "Release standard v1": ("../agency/docs/RELEASE-STANDARD.md", None),
+    "State machine truth": ("../agency/server/db.py", "TASK_TRANSITIONS"),
+    "Surface contracts": ("../agency/contracts/CONTRACTS.md", "CONTRACT_VERSION"),
     "Layout law (ADR 0005)": ("../../mind/beanmind/scripts/check_layout.py", None),
     "Honesty rule (product)": ("../../products/beanfit/AGENTS.md", "never guess"),
     "Health pane": ("bin/health.py", "fleet"),
@@ -39,7 +59,7 @@ def main():
 
     # 1. relative links resolve
     for m in re.finditer(r"\]\(([^)#h][^)]*)\)", s):
-        target = (HERE / m.group(1)).resolve()
+        target = resolve_target(m.group(1))
         if not target.exists():
             problems.append(f"broken link: {m.group(1)}")
 
@@ -56,7 +76,7 @@ def main():
 
     # 3. anchors still exist (drift catcher)
     for kernel, (rel, needle) in ANCHORS.items():
-        target = (HERE / rel).resolve()
+        target = resolve_target(rel)
         if not target.exists():
             problems.append(f"kernel '{kernel}': target missing: {rel}")
         elif needle and needle not in target.read_text(errors="ignore"):

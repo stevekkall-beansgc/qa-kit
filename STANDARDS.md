@@ -30,11 +30,11 @@ Amended: 2026-08-25
 
 **Gate semantics** — check names (docs/setup/unit/e2e) are the API; gates advisory (Free tier); binding at release. → [gate-kit/bin/compliance.py](../gate-kit/bin/compliance.py)
 
-**Release standard v1** — semver + annotated tag + pre-tag gates via `ag release` only. → [agency/docs/RELEASE-STANDARD.md](../../../agency/docs/RELEASE-STANDARD.md)
+**Release standard v1** — semver + annotated tag + pre-tag gates via `ag release` only. → [agency/docs/RELEASE-STANDARD.md](../agency/docs/RELEASE-STANDARD.md)
 
-**State machine truth** — lifecycle edges live in exactly one table: agency server db.py TASK_TRANSITIONS, conformance-tested. → [server/db.py](../../../agency/server/db.py)
+**State machine truth** — lifecycle edges live in exactly one table: agency server db.py TASK_TRANSITIONS, conformance-tested. → [server/db.py](../agency/server/db.py)
 
-**Surface contracts** — hub/runner shapes are versioned; breaking a documented shape requires bumping CONTRACTS.md. → [contracts](../../../agency/contracts/CONTRACTS.md)
+**Surface contracts** — hub/runner shapes are versioned; breaking a documented shape requires bumping CONTRACTS.md. → [contracts](../agency/contracts/CONTRACTS.md)
 
 **Layout law (ADR 0005)** — repos under ~/beans/<group>/<repo>, registered day one, no scratch elsewhere. → [check_layout.py](../../mind/beanmind/scripts/check_layout.py)
 
@@ -46,5 +46,7 @@ Amended: 2026-08-25
 
 ## Relative-path note
 
-`../../../` links resolve on disk (repo siblings); use the disk for full
-navigation or each repo's GitHub for its own standards.
+`../` links resolve on disk for platform-repo siblings; cross-group links use
+the canonical `~/beans` layout. Isolated worktrees use `BEAN_WORKSPACE_ROOT`
+for deterministic cross-repo validation. Use each repo's GitHub for its own
+standards when the local checkout is unavailable.

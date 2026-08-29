@@ -57,7 +57,7 @@
       "name": "agency",
       "path": "~/beans/platform/agency",
       "tier": "A",
-      "status": "unit-only",
+      "status": "active",
       "unit": {
         "cmd": [
           ".venv/bin/python",
@@ -68,14 +68,20 @@
         ]
       },
       "e2e": {
-        "note": "runner-flow e2e deferred to post-migration batch C",
-        "cmd": null
+        "note": "external-session lifecycle and reapproval replay over real localhost HTTP",
+        "cmd": [
+          ".venv/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_external_session_e2e.py",
+          "-q"
+        ]
       },
       "setup": {
         "cmd": [
           "bash",
           "-lc",
-          "test -x .venv/bin/python || python3 -m venv .venv; .venv/bin/python -m pip install --quiet pytest"
+          "PYTHON_BIN=python3; if ! \"$PYTHON_BIN\" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; then for candidate in python3.14 python3.13 python3.12 python3.11; do if command -v \"$candidate\" >/dev/null 2>&1 && \"$candidate\" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; then PYTHON_BIN=\"$candidate\"; break; fi; done; fi; \"$PYTHON_BIN\" -c 'import sys; raise SystemExit(\"Python >=3.10 required\" if sys.version_info < (3, 10) else 0)' || exit 1; if ! test -x .venv/bin/python || ! .venv/bin/python -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; then \"$PYTHON_BIN\" -m venv --clear .venv || exit 1; fi; .venv/bin/python -m pip install --quiet -r server/requirements.txt pytest"
         ]
       }
     },
