@@ -64,6 +64,9 @@ def main():
 
     # 1. relative links resolve
     for m in re.finditer(r"\]\(([^)#h][^)]*)\)", s):
+        if args.self_only and (m.group(1).startswith("../")
+                               or m.group(1).startswith("../../")):
+            continue
         target = resolve_target(m.group(1))
         if not target.exists():
             problems.append(f"broken link: {m.group(1)}")
