@@ -12,6 +12,7 @@ Exit 1 lists violations. Runs in qa-kit's own gate and the weekly
 reconciler job.
 """
 import re
+import argparse
 import sys
 import os
 from pathlib import Path
@@ -54,6 +55,10 @@ ANCHORS = {
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--self-only", action="store_true",
+                    help="verify only anchors available in this isolated checkout")
+    args = ap.parse_args()
     problems = []
     s = STANDARDS.read_text()
 
@@ -75,7 +80,11 @@ def main():
             problems.append(f"kernel without link-out: {line[:60]}")
 
     # 3. anchors still exist (drift catcher)
-    for kernel, (rel, needle) in ANCHORS.items():
+    anchors = ANCHORS
+    if args.self_only:
+        anchors = {k: v for k, v in ANCHORS.items()
+                   if not v[0].startswith("../") and not v[0].startswith("../../")}
+    for kernel, (rel, needle) in anchors.items():
         target = resolve_target(rel)
         if not target.exists():
             problems.append(f"kernel '{kernel}': target missing: {rel}")
@@ -87,7 +96,7 @@ def main():
         for p in problems:
             print(f"  - {p}")
         sys.exit(1)
-    print(f"STANDARDS.md ok — {len(ANCHORS)} kernel anchors verified")
+    print(f"STANDARDS.md ok — {len(anchors)} kernel anchors verified")
 
 
 if __name__ == "__main__":

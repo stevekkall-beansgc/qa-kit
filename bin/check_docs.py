@@ -8,6 +8,7 @@ a `## Test commands` section that matches the qa-kit manifest entrypoint).
 Exit 0 iff all active repos pass. Stdlib only.
 """
 import json
+import argparse
 import sys
 from pathlib import Path
 
@@ -19,8 +20,8 @@ def expand(p):
     return Path(p).expanduser()
 
 
-def check(repo):
-    root = expand(repo["path"])
+def check(repo, root_override=None):
+    root = root_override or expand(repo["path"])
     problems = []
     readme = root / "README.md"
     agents = root / "AGENTS.md"
@@ -43,14 +44,20 @@ def check(repo):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--self-only", action="store_true",
+                    help="validate this checkout only; for isolated CI runners")
+    args = ap.parse_args()
     man = json.loads(MANIFEST.read_text())
     failures = []
     checked = 0
     for repo in man["repos"]:
         if repo.get("status") == "planned":
             continue
+        if args.self_only and repo.get("name") != "qa-kit":
+            continue
         checked += 1
-        problems = check(repo)
+        problems = check(repo, HERE if args.self_only else None)
         mark = "PASS" if not problems else "FAIL"
         print(f"  [{mark}] {repo['name']}")
         for p in problems:
