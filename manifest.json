@@ -86,6 +86,23 @@
       }
     },
     {
+      "name": "beanlaunch",
+      "path": "~/beans/platform/beanlaunch",
+      "tier": "B",
+      "status": "active",
+      "unit": {
+        "cmd": [
+          "bash",
+          "tests/run_tests.sh"
+        ]
+      },
+      "e2e": {
+        "note": "OCI stack and registry safety are covered by the owning pure-function regression suite",
+        "cmd": null
+      },
+      "github": "BeanLaunch"
+    },
+    {
       "name": "bean-sched",
       "path": "~/beans/platform/bean-sched",
       "tier": "B",
