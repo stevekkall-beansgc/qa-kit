@@ -41,6 +41,8 @@ def gh(args):
 
 def main():
     man = json.loads(MANIFEST.read_text())
+    auth_rc, auth_out = gh(["auth", "status"])
+    auth_verified = auth_rc == 0
     state = {}
     if STATE.exists():
         try:
@@ -51,7 +53,12 @@ def main():
 
     new_failures = []
     infos = []
+    query_failures = []
+    if not auth_verified:
+        query_failures.append(f"GitHub auth check failed ({auth_out[:120]})")
     for repo in man["repos"]:
+        if not auth_verified:
+            break
         if repo.get("status") == "planned":
             continue
         name = repo["name"]
@@ -71,6 +78,7 @@ def main():
                                 "displayTitle,createdAt,url"])
         if rc != 0:
             infos.append(f"{name}: gh query failed ({out[:120]})")
+            query_failures.append(name)
             continue
         runs = json.loads(out or "[]")
         seen = state.get(name, {})
@@ -96,13 +104,19 @@ def main():
         print("INFO:")
         for i in infos:
             print(f"  - {i}")
+    if query_failures:
+        print(f"\nMONITOR FAILURE (auth_verified={str(auth_verified).lower()}):")
+        for failure in query_failures:
+            print(f"  ✗ {failure}")
+        sys.exit(1)
     if new_failures:
         print(f"\nNEW FAILURES ({len(new_failures)}):")
         for f in new_failures:
             print(f"  ✗ [{f['repo']}] {f['workflow']}: {f['title']}")
             print(f"      {f['url']}")
+        print("auth_verified=true")
         sys.exit(1)
-    print("all green — no new failures since last sweep")
+    print("all green — auth_verified=true; no new failures since last sweep")
 
 
 if __name__ == "__main__":
