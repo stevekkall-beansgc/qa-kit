@@ -186,11 +186,36 @@
       "github": "Bean-Skillz"
     },
     {
-      "name": "BeanLabs",
+      "name": "beanlabs",
       "path": "~/beans/labs/beanlabs",
-      "tier": "C",
-      "status": "planned",
-      "gap": "auto-detected by reconcile.py --fix; needs entrypoints + review"
+      "tier": "B",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "scripts/check_design_system.py"
+        ]
+      },
+      "e2e": {
+        "note": "design-system consumer checks remain in product repositories",
+        "cmd": null
+      }
+    },
+    {
+      "name": "jumping-beans",
+      "path": "~/beans/products/jumping-beans",
+      "tier": "A",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "node",
+          "scripts/check-product.mjs"
+        ]
+      },
+      "e2e": {
+        "note": "headed Chrome WebMCP and Cloudflare integration checks are release-time manual evidence",
+        "cmd": null
+      }
     },
     {
       "name": "qa-kit",
