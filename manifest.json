@@ -202,6 +202,27 @@
       }
     },
     {
+      "name": "bean-commons",
+      "path": "~/beans/platform/bean-commons",
+      "tier": "B",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-v"
+        ]
+      },
+      "e2e": {
+        "note": "Phase 0 is offline contract-only; the integrated Agent Link liaison e2e is owned by Agency, and no Bean Commons e2e is activated yet",
+        "cmd": null
+      }
+    },
+    {
       "name": "jumping-beans",
       "path": "~/beans/products/jumping-beans",
       "tier": "A",
