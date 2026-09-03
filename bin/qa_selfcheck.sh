@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# qa-kit self-check: docs standard + standards kernels. One entrypoint for
+# qa-kit self-check: docs, standards kernels, and offline regression tests. One entrypoint for
 # manifest/CI/AGENTS — run from repo root.
 set -e
 cd "$(dirname "$0")/.."
@@ -10,3 +10,4 @@ else
   python3 bin/check_docs.py
   python3 bin/check_standards.py
 fi
+python3 -m unittest discover -s tests -v

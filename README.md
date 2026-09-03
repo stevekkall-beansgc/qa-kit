@@ -57,6 +57,22 @@ Binding for every session, human or agent, effective 2026-08-24:
 2. Append a row to `manifest.json` with the exact cmd array.
 3. Run `bin/run_all.py --only <name> --all` once; land it green.
 
+## Agency Clawstr setup
+
+Agency's setup installs its Python test dependencies, then runs the
+repo-owned `setup/clawstr/bootstrap.sh` when that package is present. A
+missing or failed bootstrap fails setup; older checkouts without Clawstr
+remain supported. The shell preserves the CI-provided runtime PATH. The
+bootstrap requires Node.js 22+ and installs the checked-in npm lockfile with
+lifecycle scripts disabled. Gate-kit prepares Node before invoking setup.
+
+The existing Agency E2E command now also covers Clawstr via a temporary
+loopback relay and dummy signer. Tests never use the real key, journal,
+public relay, or model. Local `run_all.py` does not install dependencies;
+run Agency's documented bootstrap explicitly before its tests. qa-kit's
+registered self-check also runs its regression tests, including setup
+success, missing/failed bootstrap, and Python-install failure cases.
+
 ---
 
 **Agents:** see [AGENTS.md](AGENTS.md) before changing anything here.

@@ -20,7 +20,7 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
 - Docs standard: `python3 bin/check_docs.py`
 
 ## Test commands
-- Self-check (docs standard + standards kernels): `bash bin/qa_selfcheck.sh`
+- Self-check (docs, standards kernels, and offline regression tests): `bash bin/qa_selfcheck.sh`
 - Full sweep: `python3 bin/run_all.py --all`
 
 ## The contract (binding on every session, human or agent)

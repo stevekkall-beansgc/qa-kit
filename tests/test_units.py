@@ -3,6 +3,7 @@ import json
 import sys
 import os
 import tempfile
+import subprocess
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -90,11 +91,47 @@ class TestManifestContract(unittest.TestCase):
             (Path(__file__).resolve().parents[1] / "manifest.json").read_text()
         )
         agency = next(repo for repo in manifest["repos"] if repo["name"] == "agency")
+        self.assertEqual(agency["setup"]["cmd"][:2], ["bash", "-c"])
         setup = " ".join(agency["setup"]["cmd"])
         self.assertIn("sys.version_info >= (3, 10)", setup)
         self.assertIn("python3.12", setup)
         self.assertIn("venv --clear", setup)
         self.assertIn("-r server/requirements.txt", setup)
+
+    def _run_agency_setup(self, *, clawstr=True, bootstrap=True, pip_exit=0, bootstrap_exit=0):
+        manifest = json.loads((Path(__file__).resolve().parents[1] / "manifest.json").read_text())
+        command = next(repo for repo in manifest["repos"] if repo["name"] == "agency")["setup"]["cmd"]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            python = root / ".venv/bin/python"
+            python.parent.mkdir(parents=True)
+            python.write_text('#!/bin/sh\nif [ "$1 $2" = "-m pip" ]; then\n  echo python >> "$QA_SETUP_TRACE"\n  exit "$QA_SETUP_PIP_EXIT"\nfi\nexit 0\n')
+            python.chmod(0o700)
+            if clawstr:
+                setup = root / "setup/clawstr"
+                setup.mkdir(parents=True)
+                if bootstrap:
+                    (setup / "bootstrap.sh").write_text('echo clawstr >> "$QA_SETUP_TRACE"\nexit "$QA_SETUP_BOOTSTRAP_EXIT"\n')
+            trace = root / "trace"
+            env = dict(os.environ, QA_SETUP_TRACE=str(trace), QA_SETUP_PIP_EXIT=str(pip_exit),
+                       QA_SETUP_BOOTSTRAP_EXIT=str(bootstrap_exit))
+            result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=20)
+            return result.returncode, trace.read_text().splitlines() if trace.exists() else []
+
+    def test_agency_setup_runs_clawstr_bootstrap_after_python(self):
+        self.assertEqual(self._run_agency_setup(), (0, ["python", "clawstr"]))
+
+    def test_agency_setup_preserves_older_checkouts_without_clawstr(self):
+        self.assertEqual(self._run_agency_setup(clawstr=False), (0, ["python"]))
+
+    def test_agency_setup_fails_closed_on_missing_or_failed_bootstrap(self):
+        code, trace = self._run_agency_setup(bootstrap=False)
+        self.assertNotEqual(code, 0)
+        self.assertEqual(trace, ["python"])
+        self.assertEqual(self._run_agency_setup(bootstrap_exit=23), (23, ["python", "clawstr"]))
+
+    def test_agency_setup_stops_after_python_install_failure(self):
+        self.assertEqual(self._run_agency_setup(pip_exit=19), (19, ["python"]))
 
 
 if __name__ == "__main__":
