@@ -239,6 +239,22 @@
       }
     },
     {
+      "name": "jumping-beans-v2",
+      "path": "~/beans/products/jumping-beans-v2",
+      "tier": "A",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "node",
+          "scripts/check-product.mjs"
+        ]
+      },
+      "e2e": {
+        "note": "Messages simulator evidence is captured in-repo; signed two-device recipient testing remains a real-delivery gate",
+        "cmd": null
+      }
+    },
+    {
       "name": "qa-kit",
       "path": "~/beans/platform/qa-kit",
       "tier": "B",
