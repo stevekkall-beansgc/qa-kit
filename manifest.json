@@ -187,7 +187,7 @@
     },
     {
       "name": "beanlabs",
-      "path": "/Users/stephenkall/beans/worktrees/beanlabs-prediction-plane",
+      "path": "~/beans/labs/beanlabs",
       "tier": "B",
       "status": "active",
       "unit": {
