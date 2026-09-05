@@ -187,18 +187,25 @@
     },
     {
       "name": "beanlabs",
-      "path": "~/beans/labs/beanlabs",
+      "path": "/Users/stephenkall/beans/worktrees/beanlabs-prediction-plane",
       "tier": "B",
-      "status": "unit-only",
+      "status": "active",
       "unit": {
         "cmd": [
           "python3",
-          "scripts/check_design_system.py"
+          "scripts/check_prediction.py"
         ]
       },
       "e2e": {
-        "note": "design-system consumer checks remain in product repositories",
-        "cmd": null
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "execution.prediction.tests.test_collector",
+          "execution.prediction.tests.test_risk",
+          "-q"
+        ],
+        "note": "Offline public collector/replay and durable gateway crash/reconciliation workflow; no venue writes"
       }
     },
     {
