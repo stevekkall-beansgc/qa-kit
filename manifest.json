@@ -49,8 +49,11 @@
         }
       },
       "e2e": {
-        "note": "pairing flow owned by beanfit-app e2e (drives this CLI)",
-        "cmd": null
+        "cmd": [
+          "python3",
+          "scripts/activation_demo.py"
+        ],
+        "note": "Owned offline synthetic activation E2E; fixture Stripe only, real local Actor/report, no provider or customer proof."
       }
     },
     {
