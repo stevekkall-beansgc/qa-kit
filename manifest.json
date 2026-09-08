@@ -265,6 +265,24 @@
       }
     },
     {
+      "name": "picks-v0",
+      "path": "~/beans/picks-v0",
+      "tier": "A",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "node",
+          "--test",
+          "tests/*.cjs",
+          "tests/*.mjs"
+        ]
+      },
+      "e2e": {
+        "note": "Browser-local public demo; browser QA remains a release-time/manual check",
+        "cmd": null
+      }
+    },
+    {
       "name": "qa-kit",
       "path": "~/beans/platform/qa-kit",
       "tier": "B",
