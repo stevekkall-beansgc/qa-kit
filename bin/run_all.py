@@ -109,6 +109,13 @@ def main():
             r = run_repo(repo, kind)
             if r:
                 results.append(r)
+            elif kind == "unit":
+                results.append({"repo": repo["name"], "kind": "unit", "ok": False,
+                                "secs": 0, "tail": "no unit entrypoint registered"})
+
+    if not any(r["kind"] in kinds for r in results):
+        results.append({"repo": args.only or "selection", "kind": "selection", "ok": False,
+                        "secs": 0, "tail": "zero test entrypoints selected; check --only, tier, and manifest status"})
 
     failed = [r for r in results if not r["ok"]]
     print("\n== qa-kit report ==")

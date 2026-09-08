@@ -32,6 +32,11 @@ python3 bin/run_all.py --only beanfit-app --e2e
 python3 bin/run_all.py --include-planned   # surface known gaps
 ```
 
+An unknown repository, an empty selection, or a selected tier with no runnable
+test entrypoints fails and records a failed selection in the report. Docs alone
+cannot make QA green. `--all` still permits a unit-only repo with no E2E command;
+a missing required unit command fails even when another repo passes.
+
 ## The review-process contract
 
 Binding for every session, human or agent, effective 2026-08-24:
