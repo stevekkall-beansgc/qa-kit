@@ -160,8 +160,16 @@
         ]
       },
       "e2e": {
-        "note": "semantic-index live check is operational (LM Studio/Qdrant)",
-        "cmd": null
+        "note": "Owned deterministic MCP stdio and local context-browser flows use synthetic fixtures and temporary source/ledger state; the browser binds an ephemeral loopback port. No live indexing, model service, Qdrant, scheduler, or client activation.",
+        "cmd": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "tests.test_mcp_stdio",
+          "tests.test_context_browser",
+          "-v"
+        ]
       },
       "github": "BeanMind"
     },
