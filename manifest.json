@@ -212,8 +212,14 @@
         ]
       },
       "e2e": {
-        "note": "monthly scan is operational; quarantine machinery lives in check_tiers",
-        "cmd": null
+        "note": "Research skill install/doctor CLI through temporary project fixtures: idempotency, no-mutation dry-run, conflict and symlink refusal; no real user configuration mutations",
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_research_skill_install",
+          "-q"
+        ]
       },
       "github": "Bean-Skillz"
     },
@@ -256,9 +262,10 @@
           "unittest",
           "execution.prediction.tests.test_collector",
           "execution.prediction.tests.test_risk",
+          "tests.test_research_screening_flow",
           "-q"
         ],
-        "note": "Offline public collector/replay and durable gateway crash/reconciliation workflow; no venue writes"
+        "note": "Offline collector/replay and gateway reconciliation plus real research review CLI against a loopback-only synthetic Hub; no venue writes, model calls or outbound messages"
       }
     },
     {
