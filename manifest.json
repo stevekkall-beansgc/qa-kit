@@ -106,6 +106,27 @@
       "github": "BeanLaunch"
     },
     {
+      "name": "fantasy-draft-assistant",
+      "path": "~/beans/fantasy-draft-assistant",
+      "tier": "A",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-v"
+        ]
+      },
+      "e2e": {
+        "cmd": null,
+        "note": "Retired repository; preserved deterministic offline regression suite only."
+      }
+    },
+    {
       "name": "bean-sched",
       "path": "~/beans/platform/bean-sched",
       "tier": "B",
