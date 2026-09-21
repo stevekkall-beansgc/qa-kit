@@ -218,6 +218,27 @@
       "github": "Bean-Skillz"
     },
     {
+      "name": "job-search",
+      "path": "~/beans/labs/job-search",
+      "tier": "A",
+      "status": "active",
+      "unit": {
+        "cmd": [
+          "npm",
+          "test"
+        ]
+      },
+      "e2e": {
+        "cmd": [
+          "python3",
+          "scripts/scan_jobs.py",
+          "--plan"
+        ],
+        "note": "Owned offline scanner/configuration smoke; public ATS availability is validated operationally because release QA must remain deterministic and credential-free."
+      },
+      "github": "job-search"
+    },
+    {
       "name": "beanlabs",
       "path": "~/beans/labs/beanlabs",
       "tier": "B",
