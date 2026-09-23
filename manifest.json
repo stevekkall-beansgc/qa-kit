@@ -12,6 +12,12 @@
       "path": "~/beans/products/beanfit-app",
       "tier": "A",
       "status": "active",
+      "setup": {
+        "cmd": [
+          "npm",
+          "ci"
+        ]
+      },
       "unit": {
         "cmd": [
           "npm",

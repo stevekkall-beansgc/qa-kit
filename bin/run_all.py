@@ -2,13 +2,16 @@
 """qa-kit run_all.py — BeanLabs central QA orchestrator.
 
 Runs the unit/e2e entrypoints declared in manifest.json, one repo at a
-time, and reports a single aggregate verdict. Test BODIES live in their
-owning repos; this script only sequences them and records results.
+time, and reports a single aggregate verdict. Repos that declare a `setup`
+entrypoint get it executed before their unit/e2e tiers (once per repo);
+a failing setup blocks that repo's tests and fails the run. Test BODIES
+live in their owning repos; this script only sequences them and records
+results.
 
 Usage:
   run_all.py                # unit tier, all active repos
   run_all.py --e2e          # e2e tier
-  run_all.py --all          # unit then e2e
+  run_all.py --all          # setup then unit then e2e
   run_all.py --only beanfit-app [--e2e]
   run_all.py --manifest PATH --logs-dir PATH --only gate-kit --all
 
@@ -135,6 +138,15 @@ def main():
                             "gap": repo.get("gap", "no entrypoint registered")})
             continue
         results.append(check_docs(repo))
+        runnable = [kind for kind in kinds if (repo.get(kind) or {}).get("cmd")]
+        if (repo.get("setup") or {}).get("cmd") and runnable:
+            stage = run_repo(repo, "setup")
+            results.append(stage)
+            if not stage["ok"]:
+                for kind in runnable:
+                    results.append({"repo": repo["name"], "kind": kind, "ok": False,
+                                    "secs": 0, "tail": "skipped: setup failed"})
+                continue
         for kind in kinds:
             r = run_repo(repo, kind)
             if r:

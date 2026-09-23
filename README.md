@@ -18,7 +18,8 @@ A central test repository was evaluated and rejected:
 What IS central here:
 
 - `manifest.json` — the registry: every repo, its tier, its unit/e2e
-  entrypoints, its status (`active` / `unit-only` / `planned` + gap note).
+  entrypoints, its optional `setup` stage, its status (`active` / `unit-only`
+  / `planned` + gap note).
 - `bin/run_all.py` — one command that runs every registered entrypoint and
   emits an aggregate pass/fail with a timestamped log under `logs/`.
 
@@ -43,6 +44,11 @@ An unknown repository, an empty selection, or a selected tier with no runnable
 test entrypoints fails and records a failed selection in the report. Docs alone
 cannot make QA green. `--all` still permits a unit-only repo with no E2E command;
 a missing required unit command fails even when another repo passes.
+
+Repos that declare a `setup` entrypoint run it once, before their selected
+unit/e2e tiers, so a clean checkout installs its own dependencies first
+(e.g. beanfit-app runs lockfile-pinned `npm ci`). A failing setup blocks that
+repo's tests — the tests are recorded as skipped and the aggregate run fails.
 
 For a small cross-repository replay, check out gate-kit at the path registered
 in `manifest.json`, then run:
@@ -108,8 +114,9 @@ lifecycle scripts disabled. Gate-kit prepares Node before invoking setup.
 
 The existing Agency E2E command now also covers Clawstr via a temporary
 loopback relay and dummy signer. Tests never use the real key, journal,
-public relay, or model. Local `run_all.py` does not install dependencies;
-run Agency's documented bootstrap explicitly before its tests. qa-kit's
+public relay, or model. `run_all.py` runs Agency's registered setup before
+its tests; call the setup entrypoint directly any time dependencies must be
+installed outside that flow. qa-kit's
 registered self-check also runs its regression tests, including setup
 success, missing/failed bootstrap, and Python-install failure cases.
 
