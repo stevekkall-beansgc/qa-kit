@@ -364,8 +364,11 @@
         "cmd": [
           "python3",
           "-m",
-          "py_compile",
-          "bin/compliance.py"
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-v"
         ]
       },
       "e2e": {

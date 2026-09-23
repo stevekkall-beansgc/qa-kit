@@ -86,6 +86,16 @@ class TestStandardsResolution(unittest.TestCase):
 
 
 class TestManifestContract(unittest.TestCase):
+    def test_gate_kit_unit_entrypoint_runs_regression_suite(self):
+        manifest = json.loads(
+            (Path(__file__).resolve().parents[1] / "manifest.json").read_text()
+        )
+        gate = next(repo for repo in manifest["repos"] if repo["name"] == "gate-kit")
+        self.assertEqual(
+            gate["unit"]["cmd"],
+            ["python3", "-m", "unittest", "discover", "-s", "tests", "-v"],
+        )
+
     def test_agency_setup_validates_runtime_and_installs_dependencies(self):
         manifest = json.loads(
             (Path(__file__).resolve().parents[1] / "manifest.json").read_text()

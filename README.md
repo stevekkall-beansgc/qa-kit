@@ -30,12 +30,47 @@ python3 bin/run_all.py --e2e           # e2e tier
 python3 bin/run_all.py --all           # both
 python3 bin/run_all.py --only beanfit-app --e2e
 python3 bin/run_all.py --include-planned   # surface known gaps
+python3 bin/run_all.py --manifest PATH --logs-dir PATH # alternate registry/output
 ```
+
+`--manifest PATH` points at a different registry than `manifest.json`, and
+`--logs-dir PATH` writes the `run-*.json` reports to a different directory
+than `logs/` (created if missing). A missing or malformed manifest, a
+manifest without a `repos` list, or an unwritable `--logs-dir` exits nonzero
+with a single-line error — never a traceback or a false green.
 
 An unknown repository, an empty selection, or a selected tier with no runnable
 test entrypoints fails and records a failed selection in the report. Docs alone
 cannot make QA green. `--all` still permits a unit-only repo with no E2E command;
 a missing required unit command fails even when another repo passes.
+
+For a small cross-repository replay, check out gate-kit at the path registered
+in `manifest.json`, then run:
+
+```bash
+python3 bin/run_all.py --only gate-kit --all
+```
+
+The report includes separate `docs` and `unit` verdicts (the latter runs
+gate-kit's regression suite), an aggregate count, and a timestamped JSON file
+under `logs/`. This is a local integration check, not proof that a public CI
+run or release passed. Because gate-kit is registered as `unit-only`, this
+command does not claim E2E coverage.
+
+## Clean-room synthetic quickstart
+
+`examples/synthetic_quickstart.py` runs the real `bin/run_all.py` against a
+disposable synthetic repo created under a temp directory — no BeanLabs
+workspace, no network, no real data. It writes timestamped JSON reports to a
+disposable `--logs-dir` and demonstrates, with exit codes and report files:
+
+1. a passing docs + unit run,
+2. a failing docs run, and
+3. a failing unit run (each nonzero-exit with its JSON report preserved).
+
+```bash
+python3 examples/synthetic_quickstart.py
+```
 
 ## The review-process contract
 

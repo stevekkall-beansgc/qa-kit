@@ -10,8 +10,11 @@ Usage:
   run_all.py --e2e          # e2e tier
   run_all.py --all          # unit then e2e
   run_all.py --only beanfit-app [--e2e]
+  run_all.py --manifest PATH --logs-dir PATH --only gate-kit --all
 
-Stdlib only. Results appended to logs/run-<utcstamp>.json.
+Stdlib only. Results appended to logs/run-<utcstamp>.json (override with
+--manifest for a different registry and --logs-dir for a different output
+directory).
 """
 import argparse
 import json
@@ -27,8 +30,23 @@ LOGS = HERE / "logs"
 TIMEOUT_SECS = 900
 
 
-def load_manifest():
-    return json.loads(MANIFEST.read_text())
+class QaKitError(Exception):
+    """Clear, user-facing failure: printed once to stderr, exit code 2."""
+
+
+def load_manifest(path=None):
+    manifest = Path(path).expanduser() if path else MANIFEST
+    if not manifest.exists():
+        raise QaKitError(f"manifest not found: {manifest}")
+    try:
+        data = json.loads(manifest.read_text())
+    except (OSError, UnicodeError) as exc:
+        raise QaKitError(f"cannot read manifest {manifest}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise QaKitError(f"malformed manifest {manifest}: {exc}") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("repos"), list):
+        raise QaKitError(f"manifest {manifest}: missing 'repos' list")
+    return data
 
 
 def expand(path):
@@ -78,7 +96,9 @@ def check_docs(repo):
         cmd = (repo.get("unit") or {}).get("cmd")
         if cmd and " ".join(cmd) not in ag_text.replace("`", ""):
             problems.append("AGENTS.md does not state manifest unit cmd")
-    if rd.exists() and "AGENTS.md" not in rd.read_text():
+    if not rd.exists():
+        problems.append("missing README.md")
+    elif "AGENTS.md" not in rd.read_text():
         problems.append("README does not reference AGENTS.md")
     return {"repo": repo["name"], "kind": "docs", "ok": not problems,
             "secs": round(time.monotonic() - t0, 2),
@@ -92,10 +112,20 @@ def main():
     ap.add_argument("--only", default=None)
     ap.add_argument("--include-planned", action="store_true",
                     help="list planned/gap repos instead of skipping silently")
+    ap.add_argument("--manifest", default=None,
+                    help="path to manifest.json (default: this repo's manifest)")
+    ap.add_argument("--logs-dir", default=None,
+                    help="directory for run-*.json reports (default: logs/)")
     args = ap.parse_args()
 
     kinds = ["unit", "e2e"] if args.all else (["e2e"] if args.e2e else ["unit"])
-    man = load_manifest()
+    manifest_path = expand(args.manifest) if args.manifest else MANIFEST
+    logs_dir = expand(args.logs_dir) if args.logs_dir else LOGS
+    try:
+        man = load_manifest(manifest_path)
+    except QaKitError as exc:
+        print(f"qa-kit error: {exc}", file=sys.stderr)
+        sys.exit(2)
     results, skipped = [], []
     for repo in man["repos"]:
         if args.only and repo["name"] != args.only:
@@ -131,10 +161,15 @@ def main():
     print(f"\n{len(results) - len(failed)}/{len(results)} passed"
           + (f" · {len(skipped)} planned" if skipped else ""))
 
-    LOGS.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    (LOGS / f"run-{stamp}.json").write_text(json.dumps(
-        {"when": stamp, "results": results, "planned_skipped": skipped}, indent=2))
+    try:
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        (logs_dir / f"run-{stamp}.json").write_text(json.dumps(
+            {"when": stamp, "results": results, "planned_skipped": skipped}, indent=2))
+    except OSError as exc:
+        print(f"qa-kit error: cannot write report to logs dir {logs_dir}: {exc}",
+              file=sys.stderr)
+        sys.exit(2)
     sys.exit(1 if failed else 0)
 
 
