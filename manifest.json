@@ -410,6 +410,34 @@
         "note": "runtime integration and Gate A remain incomplete",
         "cmd": null
       }
+    },
+    {
+      "name": "bean-counter",
+      "path": "~/beans/products/bean-counter",
+      "tier": "A",
+      "status": "active",
+      "setup": {
+        "cmd": [
+          "sh",
+          "scripts/ci-setup.sh"
+        ]
+      },
+      "unit": {
+        "cmd": [
+          "sh",
+          "scripts/check-local-billing.sh"
+        ],
+        "env": {
+          "PYTHONPATH": "work/check-deps"
+        }
+      },
+      "e2e": {
+        "cmd": [
+          "sh",
+          "scripts/check-local-billing-e2e.sh"
+        ],
+        "note": "Owned local SQLite billing and legacy CLI subprocess tests. No PostgreSQL, reserved-resource completion, hosted service or independent-acceptance claim."
+      }
     }
   ]
 }
