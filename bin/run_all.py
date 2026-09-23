@@ -15,7 +15,7 @@ Usage:
   run_all.py --only beanfit-app [--e2e]
   run_all.py --manifest PATH --logs-dir PATH --only gate-kit --all
 
-Stdlib only. Results appended to logs/run-<utcstamp>.json (override with
+Stdlib only. Each run writes a distinct logs/run-<utcstamp>[-N].json report (override with
 --manifest for a different registry and --logs-dir for a different output
 directory).
 """
@@ -174,10 +174,23 @@ def main():
           + (f" · {len(skipped)} planned" if skipped else ""))
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    payload = json.dumps(
+        {"when": stamp, "results": results, "planned_skipped": skipped}, indent=2)
     try:
         logs_dir.mkdir(parents=True, exist_ok=True)
-        (logs_dir / f"run-{stamp}.json").write_text(json.dumps(
-            {"when": stamp, "results": results, "planned_skipped": skipped}, indent=2))
+        base = logs_dir / f"run-{stamp}.json"
+        candidate = base
+        suffix = 0
+        while True:
+            try:
+                with candidate.open("x", encoding="utf-8") as f:
+                    f.write(payload)
+                break
+            except FileExistsError:
+                suffix += 1
+                if suffix > 999:
+                    raise OSError(f"too many report collisions for {base}")
+                candidate = logs_dir / f"run-{stamp}-{suffix}.json"
     except OSError as exc:
         print(f"qa-kit error: cannot write report to logs dir {logs_dir}: {exc}",
               file=sys.stderr)
