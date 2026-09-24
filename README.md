@@ -11,18 +11,24 @@ private BeanLabs workspace are separated in
 > **Engineering standards:** [STANDARDS.md](STANDARDS.md)
 >
 > **Private vulnerability reports:** [SECURITY.md](SECURITY.md)
+>
+> **Public contribution guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Five-minute public showcase
 
 ### 1. Clone and run
 
-Prerequisites are Git and `python3`. Repository CI currently exercises Python
-3.12; other Python versions and operating systems are not claimed by this
-quickstart.
+Prerequisites are Git and Python 3.12. The tested public runtime contract is
+the repository's GitHub Actions job: `ubuntu-latest` with Python 3.12, as
+configured in `.github/workflows/test.yml`. The code is standard-library-only,
+but other Python versions, implementations, and operating systems are not
+claimed as supported. Use `python3` only when it resolves to Python 3.12 for a
+supported run.
 
 ```bash
 git clone https://github.com/stevekkall-beansgc/qa-kit.git
 cd qa-kit
+python3 --version
 python3 examples/synthetic_quickstart.py
 ```
 
@@ -52,7 +58,33 @@ The console lines prefixed `PASS` are the visible evidence; the underlying
 report contains `when`, `results`, and `planned_skipped`, with each result
 recording `repo`, `kind`, `ok`, `secs`, and captured output in `tail`.
 
-### 3. Understand the core manifest runner
+### 3. Verify the checked-in public report sample
+
+The stable sample at
+[`examples/synthetic_quickstart_report.json`](examples/synthetic_quickstart_report.json)
+is a sanitized, normalized copy of the quickstart's real passing docs-and-unit
+scenario. It contains no private paths, credentials, or real data. Its fixed
+`when` and `secs` values, and the `<elapsed>s` test-duration marker, make the
+artifact reproducible; the verdicts and result fields come from an actual run
+of `bin/run_all.py`.
+
+Verify the sample against a fresh execution of all three synthetic scenarios:
+
+```bash
+python3 examples/synthetic_quickstart.py --verify-sample examples/synthetic_quickstart_report.json
+```
+
+When the sample itself needs an intentional refresh, use:
+
+```bash
+python3 examples/synthetic_quickstart.py --write-sample examples/synthetic_quickstart_report.json
+```
+
+The write command runs the real quickstart, normalizes only the documented
+dynamic fields, and overwrites the sample after review. The quickstart still
+uses disposable temporary fixtures and never reads the private fleet manifest.
+
+### 4. Understand the core manifest runner
 
 A manifest is executable configuration. Each row registers a repository path,
 status, and optional `setup`, `unit`, and `e2e` commands. Only use manifests,
@@ -82,15 +114,19 @@ default fleet manifest.
   does not register setup or e2e commands, so it does not exercise those paths.
 - It uses disposable fixtures. It makes no claim about live services, private
   fleet health, production behavior, external CI, or release status.
-- Each JSON report exists during the scenario, but the temporary directory is
-  deleted when the quickstart exits; the reports are not retained for later
-  inspection.
+- Each raw JSON report from the three quickstart scenarios exists only during
+  that scenario; the temporary directory is deleted when the quickstart exits.
+  The checked-in sample is a separate, sanitized copy of the passing scenario,
+  not a retained report from a later run.
+- The checked-in sample covers the passing docs-and-unit path only. The
+  quickstart itself still exercises both failure paths and is the route for
+  checking them.
 - The default `manifest.json` points to a private BeanLabs workspace. The
   standalone quickstart does not read it.
 - Local quickstart success is a regression check, not evidence of an external
   CI run, release approval, or security audit.
-- Repository CI exercises Python 3.12; no broader runtime or platform support is
-  asserted here.
+- The tested runtime is Python 3.12 on `ubuntu-latest`; no broader runtime or
+  platform support is asserted here.
 
 To run qa-kit's own validators and regression suite in an isolated checkout
 without following fleet paths, use the script's self-check mode:

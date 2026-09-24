@@ -11,9 +11,14 @@ Demonstrates, in order:
   2. a failing docs run         (nonzero exit, JSON report preserved)
   3. a failing unit run         (nonzero exit, JSON report preserved)
 
-Usage: python3 examples/synthetic_quickstart.py
+Usage:
+  python3 examples/synthetic_quickstart.py
+  python3 examples/synthetic_quickstart.py --write-sample PATH
+  python3 examples/synthetic_quickstart.py --verify-sample PATH
 """
+import argparse
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -21,6 +26,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 RUN_ALL = HERE / "bin" / "run_all.py"
+PUBLIC_SAMPLE_WHEN = "20260924T000000Z"
 
 UNIT_CMD = ["python3", "-m", "unittest", "discover", "-s", "tests"]
 UNIT_TEXT = " ".join(UNIT_CMD)
@@ -93,16 +99,52 @@ def run_scenario(root, label, *, docs_ok, unit_ok, expect_fail):
     return proc.returncode, report
 
 
-def main():
+def public_sample_report(report):
+    results = []
+    for result in report["results"]:
+        public_result = dict(result)
+        public_result["secs"] = 0.0
+        public_result["tail"] = re.sub(
+            r"Ran \d+ tests? in [0-9.]+s",
+            "Ran 1 test in <elapsed>s",
+            public_result["tail"],
+        )
+        results.append(public_result)
+    return {
+        "when": PUBLIC_SAMPLE_WHEN,
+        "results": results,
+        "planned_skipped": report["planned_skipped"],
+    }
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--write-sample", type=Path, metavar="PATH",
+        help="write a normalized copy of the passing scenario report",
+    )
+    parser.add_argument(
+        "--verify-sample", type=Path, metavar="PATH",
+        help="verify a normalized report against a fresh quickstart run",
+    )
+    args = parser.parse_args(argv)
+    if args.write_sample and args.verify_sample:
+        parser.error("choose only one of --write-sample and --verify-sample")
+    return args
+
+
+def main(argv=None):
+    args = parse_args(argv)
     with tempfile.TemporaryDirectory(prefix="qa-kit-synthetic-") as tmp:
         root = Path(tmp)
 
-        code, report = run_scenario(root, "pass",
-                                    docs_ok=True, unit_ok=True, expect_fail=False)
-        if not all(r["ok"] for r in report["results"]):
+        code, pass_report = run_scenario(root, "pass",
+                                         docs_ok=True, unit_ok=True, expect_fail=False)
+        if not all(r["ok"] for r in pass_report["results"]):
             raise SystemExit("pass: a result failed unexpectedly")
-        print(f"PASS  docs+unit run: exit {code}, all {len(report['results'])} "
+        print(f"PASS  docs+unit run: exit {code}, all {len(pass_report['results'])} "
               "results ok, JSON report written")
+        sample_report = public_sample_report(pass_report)
 
         code, report = run_scenario(root, "bad-docs",
                                     docs_ok=False, unit_ok=True, expect_fail=True)
@@ -115,6 +157,22 @@ def main():
         if not any(not r["ok"] and r["kind"] == "unit" for r in report["results"]):
             raise SystemExit("bad-unit: no failing unit verdict in report")
         print(f"PASS  failing unit run: exit {code}, unit FAIL recorded, JSON report written")
+
+        if args.write_sample:
+            args.write_sample.parent.mkdir(parents=True, exist_ok=True)
+            args.write_sample.write_text(
+                json.dumps(sample_report, indent=2) + "\n", encoding="utf-8")
+            print(f"WROTE normalized sample: {args.write_sample}")
+        if args.verify_sample:
+            try:
+                expected = json.loads(args.verify_sample.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                raise SystemExit(
+                    f"cannot read sample report {args.verify_sample}: {exc}") from exc
+            if expected != sample_report:
+                raise SystemExit(
+                    f"sample report does not match this quickstart run: {args.verify_sample}")
+            print(f"PASS  sample report verified: {args.verify_sample}")
 
     print("synthetic quickstart OK (3/3 scenarios, all output in disposable dirs)")
 

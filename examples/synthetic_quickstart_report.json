@@ -1,0 +1,20 @@
+{
+  "when": "20260924T000000Z",
+  "results": [
+    {
+      "repo": "synthetic-repo-pass",
+      "kind": "docs",
+      "ok": true,
+      "secs": 0.0,
+      "tail": ""
+    },
+    {
+      "repo": "synthetic-repo-pass",
+      "kind": "unit",
+      "ok": true,
+      "secs": 0.0,
+      "tail": ".\n----------------------------------------------------------------------\nRan 1 test in <elapsed>s\n\nOK"
+    }
+  ],
+  "planned_skipped": []
+}
