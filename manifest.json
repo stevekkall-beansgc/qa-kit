@@ -346,6 +346,22 @@
       }
     },
     {
+      "name": "bean-labs",
+      "path": "~/beans/showcase/beanlabs-showcase",
+      "tier": "C",
+      "status": "unit-only",
+      "unit": {
+        "cmd": [
+          "python3",
+          "scripts/check_showcase.py"
+        ]
+      },
+      "e2e": {
+        "note": "Static public portfolio: local Markdown targets and SVG XML are checked offline; external links and release claims are reviewed at publication time.",
+        "cmd": null
+      }
+    },
+    {
       "name": "qa-kit",
       "path": "~/beans/platform/qa-kit",
       "tier": "B",
