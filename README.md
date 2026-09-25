@@ -10,6 +10,8 @@ private BeanLabs workspace are separated in
 
 > **Engineering standards:** [STANDARDS.md](STANDARDS.md)
 >
+> **Publication and portfolio reviews:** [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
+>
 > **Private vulnerability reports:** [SECURITY.md](SECURITY.md)
 >
 > **Public contribution guide:** [CONTRIBUTING.md](CONTRIBUTING.md)
