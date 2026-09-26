@@ -265,15 +265,17 @@
       "e2e": {
         "cmd": [
           "python3",
-          "-m",
-          "unittest",
-          "execution.prediction.tests.test_collector",
-          "execution.prediction.tests.test_risk",
-          "tests.test_research_screening_flow",
-          "shared.nina_voice.tests.test_voice.VoiceHTTPFlowTests",
-          "-q"
+          "scripts/check_offline_flows.py"
         ],
-        "note": "Offline collector/replay and gateway reconciliation plus real research review CLI against a loopback-only synthetic Hub; no venue writes, model calls or outbound messages"
+        "note": "Owned offline collector/replay, research CLI and Nina voice/search/knowledge flows in local workerd/D1 with synthetic providers; no live inference, venue writes or outbound messages."
+      },
+      "setup": {
+        "cmd": [
+          "npm",
+          "--prefix",
+          "shared/nina_cloudflare",
+          "ci"
+        ]
       }
     },
     {
