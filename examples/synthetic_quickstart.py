@@ -3,7 +3,7 @@
 
 Runs the REAL bin/run_all.py against a disposable, synthetic repository
 created under a temp directory, and writes timestamped JSON reports to a
-disposable logs directory. No BeanLabs workspace, no network, no real data,
+disposable logs directory. No Legume Labs workspace, no network, no real data,
 no credentials.
 
 Demonstrates, in order:

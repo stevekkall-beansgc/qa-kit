@@ -87,7 +87,7 @@ an aggregate status need not prove required tests ran. Inspect a badge's scope.
 [Caddy workflow](https://github.com/caddyserver/caddy/blob/master/.github/workflows/ci.yml),
 [vLLM CI guidance](https://docs.vllm.ai/en/latest/contributing/).
 
-The rubric and thresholds are BeanLabs decision rules, not published hiring
+The rubric and thresholds are Legume Labs decision rules, not published hiring
 standards or statistically validated predictors of hiring outcomes.
 
 ## 2. Establish scope before awarding points
@@ -266,7 +266,7 @@ Do not require multiple maintainers, enterprise governance, daily commits,
 broad platform coverage, paid observability, a large test count, or a live
 service for every project. A monolith can earn full architecture credit; a CLI
 transcript can satisfy a demo; an accurately documented paused project can
-earn maintenance credit. Existing mandatory BeanLabs checks still apply.
+earn maintenance credit. Existing mandatory Legume Labs checks still apply.
 
 AI assistance is neither a bonus nor a penalty. Assess whether the builder can
 explain the design, identify generated/inherited parts, verify consequential

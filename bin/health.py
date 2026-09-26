@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""health.py — ONE pane for BeanLabs fleet health.
+"""health.py — ONE pane for Legume Labs fleet health.
 
 Aggregates: service probes (hub, runner, Qdrant, LM Studio, harness
 console), per-repo latest GitHub Actions conclusion, last qa-kit baseline
@@ -229,7 +229,7 @@ def html(data):
     q = data["qa"]
     mon = data["monitors"]
     return f"""<!doctype html><html><head><meta charset="utf-8">
-<title>BeanLabs fleet health</title><meta http-equiv="refresh" content="300">
+<title>Legume Labs fleet health</title><meta http-equiv="refresh" content="300">
 <style>body{{font-family:-apple-system,sans-serif;background:#0f1216;color:#e6e8eb;
 margin:0;padding:24px}}h1{{font-size:1.3rem}} h2{{font-size:1rem;margin:22px 0 8px;
 color:#9aa4af;text-transform:uppercase;letter-spacing:.08em;font-size:.75rem}}
@@ -237,7 +237,7 @@ table{{border-collapse:collapse;width:100%;max-width:720px}} td{{padding:6px 10p
 border-bottom:1px solid #232a33}} .m{{color:#667085}} .d{{display:inline-block;
 width:10px;height:10px;border-radius:50%}} .g{{background:#34d399}} .r{{background:#f87171}} .y{{background:#fbbf24}}
 a{{color:#7dd3fc;text-decoration:none}} .sub{{color:#667085;font-size:.85rem}}</style></head><body>
-<h1>BeanLabs fleet health</h1>
+<h1>Legume Labs fleet health</h1>
 <p class="sub"><a href="https://github.com/stevekkall-beansgc/qa-kit/blob/main/STANDARDS.md">Standards & maintenance loops</a> · this pane regenerates every 15 min</p>
 <p class="sub">generated {data['generated']} · refreshes every 5 min</p>
 <h2>services</h2><table>{svc}</table>

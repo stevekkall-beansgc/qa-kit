@@ -1,7 +1,7 @@
 # Contributing to qa-kit
 
 This is the complete public contribution workflow. It assumes an outside
-contributor with access only to this repository. No BeanLabs workspace, Agency
+contributor with access only to this repository. No Legume Labs workspace, Agency
 account, credentials, or private fleet checkout is required.
 
 ## Requirements

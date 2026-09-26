@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "BeanLabs QA manifest \u2014 single source of truth for what is tested, how, and where. E2E bodies live in their owning repos; this file only registers entrypoints.",
+  "description": "Legume Labs QA manifest \u2014 single source of truth for what is tested, how, and where. E2E bodies live in their owning repos; this file only registers entrypoints.",
   "tiers": {
     "A": "user-facing product code",
     "B": "operational tooling",

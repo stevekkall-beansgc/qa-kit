@@ -17,7 +17,7 @@ class PublicDocumentationTests(unittest.TestCase):
         self.assertTrue((ROOT / "examples" / "synthetic_quickstart.py").is_file())
         self.assertIn(command, readme)
         self.assertLess(
-            readme.index(command), readme.index("## BeanLabs fleet operations"))
+            readme.index(command), readme.index("## Legume Labs fleet operations"))
         self.assertIn("## Exact limitations", readme)
 
     def test_security_policy_names_private_reporting_and_support_scope(self):
@@ -25,7 +25,7 @@ class PublicDocumentationTests(unittest.TestCase):
         self.assertIn(PRIVATE_REPORT_URL, security)
         self.assertIn("Private vulnerability reporting is enabled", security)
         self.assertIn("current `main` branch and the latest tagged release", security)
-        self.assertIn("external BeanLabs repositories", security)
+        self.assertIn("external Legume Labs repositories", security)
 
     def test_contributing_is_self_contained_for_public_checkout(self):
         contributing = (ROOT / "CONTRIBUTING.md").read_text()
