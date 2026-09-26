@@ -57,9 +57,9 @@
       "e2e": {
         "cmd": [
           "python3",
-          "scripts/activation_demo.py"
+          "scripts/offline_e2e.py"
         ],
-        "note": "Owned offline synthetic activation E2E; fixture Stripe only, real local Actor/report, no provider or customer proof."
+        "note": "Owned offline synthetic activation and mobile selection E2Es; no provider calls, model inference or physical-device proof."
       }
     },
     {
