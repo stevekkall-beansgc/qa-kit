@@ -270,6 +270,7 @@
           "execution.prediction.tests.test_collector",
           "execution.prediction.tests.test_risk",
           "tests.test_research_screening_flow",
+          "shared.nina_voice.tests.test_voice.VoiceHTTPFlowTests",
           "-q"
         ],
         "note": "Offline collector/replay and gateway reconciliation plus real research review CLI against a loopback-only synthetic Hub; no venue writes, model calls or outbound messages"
