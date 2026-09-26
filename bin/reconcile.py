@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""reconcile.py — registry drift catcher for BeanLabs.
+"""reconcile.py — registry drift catcher for Legume Labs.
 
 Enumerates git repos actually on disk (beans layout + known legacy paths),
 then diffs against BOTH registries: this manifest and agency's repos.json.

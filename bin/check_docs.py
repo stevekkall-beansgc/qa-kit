@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_docs.py — enforce the BeanLabs docs standard (v1).
+"""check_docs.py — enforce the Legume Labs docs standard (v1).
 
 Every active repo must carry a human wiki (README.md mentioning its agent
 wiki) and an agent wiki (AGENTS.md following the agents.md convention with

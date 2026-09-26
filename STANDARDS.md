@@ -1,4 +1,4 @@
-# BeanLabs Engineering Standards — Kernels
+# Legume Labs Engineering Standards — Kernels
 
 **Rule of this file:** one imperative per standard, same-line link out.
 Full requirements live at the link — never duplicate them here. If a

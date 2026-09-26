@@ -17,6 +17,6 @@ Older tags are historical and are not supported.
 
 This policy covers qa-kit code in this repository, including the manifest
 runner, documentation validators, synthetic quickstart, and regression tests.
-Reports about external BeanLabs repositories, services, workspaces, or
+Reports about external Legume Labs repositories, services, workspaces, or
 credentials referenced by the fleet manifest should go to the affected
 maintainers. Do not include credentials or real user data in a report.

@@ -22,7 +22,7 @@ STANDARDS = HERE / "STANDARDS.md"
 
 
 def workspace_root() -> Path:
-    """Return the canonical Bean Labs root used for cross-repo references."""
+    """Return the canonical Legume Labs root used for cross-repo references."""
     return Path(os.environ.get("BEAN_WORKSPACE_ROOT", str(Path.home() / "beans"))).expanduser()
 
 

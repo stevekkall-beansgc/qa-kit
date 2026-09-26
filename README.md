@@ -5,8 +5,8 @@ check commands from a manifest, runs selected tiers, and records JSON verdicts.
 Test bodies stay in the repositories that own the code.
 
 For a public, standalone demonstration, start below. Commands that require the
-private BeanLabs workspace are separated in
-[BeanLabs fleet operations](#beanlabs-fleet-operations-private-workspace).
+private Legume Labs workspace are separated in
+[Legume Labs fleet operations](#beanlabs-fleet-operations-private-workspace).
 
 > **Engineering standards:** [STANDARDS.md](STANDARDS.md)
 >
@@ -40,7 +40,7 @@ The final line should be:
 synthetic quickstart OK (3/3 scenarios, all output in disposable dirs)
 ```
 
-No package installation, BeanLabs workspace, network access, credentials, or
+No package installation, Legume Labs workspace, network access, credentials, or
 real repository is needed. The quickstart reads this checkout and writes only
 to a system temporary directory.
 
@@ -123,7 +123,7 @@ default fleet manifest.
 - The checked-in sample covers the passing docs-and-unit path only. The
   quickstart itself still exercises both failure paths and is the route for
   checking them.
-- The default `manifest.json` points to a private BeanLabs workspace. The
+- The default `manifest.json` points to a private Legume Labs workspace. The
   standalone quickstart does not read it.
 - Local quickstart success is a regression check, not evidence of an external
   CI run, release approval, or security audit.
@@ -140,7 +140,7 @@ CI=true bash bin/qa_selfcheck.sh
 Plain `bash bin/qa_selfcheck.sh` validates all active entries in the default
 fleet manifest and therefore requires that private workspace.
 
-## BeanLabs fleet operations (private workspace)
+## Legume Labs fleet operations (private workspace)
 
 Everything in this section assumes the `~/beans/...` paths in the default
 `manifest.json` exist. It is not required for the public showcase.
@@ -187,7 +187,7 @@ as `unit-only`, this command does not claim E2E coverage.
 
 ### Review-process contract
 
-Binding for every BeanLabs session, human or agent, effective 2026-08-24:
+Binding for every Legume Labs session, human or agent, effective 2026-08-24:
 
 1. **Bug fixes ship with a regression test** that fails on the old code and
    passes on the new. No exception.

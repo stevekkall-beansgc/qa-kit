@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""qa-kit run_all.py — BeanLabs central QA orchestrator.
+"""qa-kit run_all.py — Legume Labs central QA orchestrator.
 
 Runs the unit/e2e entrypoints declared in manifest.json, one repo at a
 time, and reports a single aggregate verdict. Repos that declare a `setup`
