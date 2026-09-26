@@ -193,6 +193,7 @@
           "-B",
           "-m",
           "unittest",
+          "tests.test_codex_archive_e2e",
           "tests.test_mcp_stdio",
           "tests.test_context_browser",
           "-v"
