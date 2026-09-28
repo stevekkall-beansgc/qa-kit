@@ -94,6 +94,9 @@ class ReportingIntegrity(unittest.TestCase):
             subprocess.run(['git','-C',str(primary),'remote','add','origin','https://github.com/o/r.git'],check=True)
             subprocess.run(['git','-C',str(primary),'worktree','add',str(linked)],check=True,capture_output=True)
             self.assertEqual(repo_remote(linked),('remote','https://github.com/o/r.git'))
+            rows=[{'name':'source','path':str(primary)}]
+            problems,_=reconcile.registry_drift(rows,rows,{str(linked):'working-copy'})
+            self.assertEqual(problems,[], 'a linked task checkout is not a new repository')
 
     def test_single_repo_pass_is_scoped_and_unrelated_failure_visible(self):
         with tempfile.TemporaryDirectory() as directory:

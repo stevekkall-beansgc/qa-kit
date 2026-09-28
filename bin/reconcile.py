@@ -17,6 +17,7 @@ Designed to run unattended via bean-sched; stdout is the audit trail.
 import json
 import sys
 from pathlib import Path
+from reporting import common_identity
 
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
@@ -64,6 +65,12 @@ def registry_drift(qa, agency, disk, path_exists=None):
     problems, unregistered = [], []
     registries = [('QA', qa), ('Agency', agency)]
     maps = {}
+    identities = {}
+    cached = {}
+    def common(path):
+        if path not in cached:
+            cached[path] = common_identity(path)
+        return cached[path]
     for label, rows in registries:
         mapping = {}
         for row in rows:
@@ -74,6 +81,7 @@ def registry_drift(qa, agency, disk, path_exists=None):
             if not path_exists(path):
                 problems.append(f'{label} row {name} path missing: {path}')
         maps[label] = mapping
+        identities[label] = {value for p in mapping.values() if (value := common(p)) is not None}
     for name in set(maps['QA']) & set(maps['Agency']):
         if maps['QA'][name] != maps['Agency'][name]:
             problems.append(f'registry path mismatch: {name}')
@@ -86,7 +94,9 @@ def registry_drift(qa, agency, disk, path_exists=None):
         # Deliberately archived assets do not acquire validation requirements.
         if 'archive' in Path(path).parts:
             continue
-        missing = [label for label in maps if path not in maps[label].values()]
+        source = common(path)
+        missing = [label for label in maps if path not in maps[label].values()
+                   and (source is None or source not in identities[label])]
         if missing:
             problems.append(f'repo on disk missing from {" and ".join(missing)}: {path}')
             if 'QA' in missing:

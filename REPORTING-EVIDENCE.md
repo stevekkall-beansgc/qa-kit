@@ -70,6 +70,8 @@ retained for individual observations; they are not a new approved recovery targe
 The reconciler validates the QA and Agency registries independently, detects
 name/path disagreements and dead paths in either source, and fails closed on
 unreadable or malformed sources. It does not automatically fix Agency's registry.
+Linked task checkouts share their registered source's Git common identity;
+they do not become new repositories or acquire separate test obligations.
 Archived disk-only storage retains its existing no-test treatment. Registered
 archived rows missing from the other registry remain unresolved drift until an
 explicit exemption policy is approved; no test entrypoints are added for them.

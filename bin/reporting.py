@@ -27,6 +27,11 @@ def repo_remote(path):
     return ('remote', url) if not rc and url else ('unknown', '')
 
 
+def common_identity(path):
+    rc, value = git_value(path, 'rev-parse', '--path-format=absolute', '--git-common-dir')
+    return str(Path(value).resolve()) if rc == 0 and value else None
+
+
 def identity(path):
     rc, head = git_value(path, 'rev-parse', 'HEAD')
     status_rc, status = git_value(path, 'status', '--porcelain=v1', '--untracked-files=all')
