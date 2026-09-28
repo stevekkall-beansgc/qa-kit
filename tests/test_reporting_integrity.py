@@ -10,6 +10,7 @@ import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'bin'))
 import health
@@ -18,6 +19,45 @@ import reconcile
 
 
 class ReportingIntegrity(unittest.TestCase):
+    def test_offsite_object_just_over_24_hours_is_stale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            clock=datetime(2026,9,28,16,tzinfo=timezone.utc)
+            responses=[SimpleNamespace(returncode=1,stdout=''),
+                       SimpleNamespace(returncode=0,stdout='1 2026-09-27T15:59:59Z gs://example/object')]
+            with mock.patch.object(health.Path,'home',return_value=Path(directory)), \
+                 mock.patch.object(health.subprocess,'run',side_effect=responses),mock.patch.object(health,'datetime') as dates:
+                dates.now.return_value=clock;dates.strptime.side_effect=datetime.strptime
+                rows=health.backups()
+            offsite=next(row for row in rows if row[0]=='DB offsite (GCS)')
+            self.assertFalse(offsite[2])
+
+    def test_archived_exemption_requires_exact_identity_and_archived_state(self):
+        row={'name':'old','path':'/beans/archive/old','archived':True}
+        exemptions={'old':{'path':'/beans/archive/old','owner':'agency'}}
+        with mock.patch.object(reconcile,'common_identity',return_value=None):
+            problems,_=reconcile.registry_drift([], [row], {},path_exists=lambda p:True,exemptions=exemptions)
+            self.assertFalse(problems)
+            for changed in [dict(row,archived=False),dict(row,path='/beans/archive/other')]:
+                problems,_=reconcile.registry_drift([], [changed], {},path_exists=lambda p:True,exemptions=exemptions)
+                self.assertTrue(any('QA missing row' in p for p in problems))
+            problems,_=reconcile.registry_drift([], [row], {},path_exists=lambda p:False,exemptions=exemptions)
+            self.assertTrue(any('path missing' in p for p in problems))
+
+    def test_malformed_exemption_policy_cannot_suppress_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'policy.json'
+            for data in [{'schema_version':1,'registry':{'archived_exemptions':[{'name':'old','path':'/beans/platform/live','owner':'agency'}]}},
+                         {'schema_version':1,'registry':{'archived_exemptions':'old'}}]:
+                path.write_text(json.dumps(data))
+                with self.assertRaises(ValueError):reconcile.read_exemptions(path)
+
+    def test_approved_recovery_objective_cannot_approve_legacy_restore(self):
+        rows=health.restore_status({'when':'2026-09-28T12:00:00Z','local':{'ok':True},'offsite':{'ok':True},'overall':True},
+                                  now=datetime(2026,9,28,16,tzinfo=timezone.utc),
+                                  policy={'owner':'agency','consistency':'snapshot-consistent','max_recovery_point_age_hours':24})
+        self.assertIn('<= 24h',rows[-1][1])
+        self.assertIsNone(rows[-1][2])
+
     def test_dashboard_serializes_unknown_with_explicit_contract(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);manifest=root/'manifest.json';manifest.write_text('{"repos":[]}')

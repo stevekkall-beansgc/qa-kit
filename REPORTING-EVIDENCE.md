@@ -49,13 +49,14 @@ digest, every eligible repository and declared check, a known clean QA source,
 and known clean, unchanged before/after repository identities matching current
 local identities. Candidate proof does not establish remote CI or approved age.
 
-**Fleet coverage and maximum age are pending an owner decision.** Until that
-policy and its CI acceptance rules are configured, fleet status is UNVERIFIED;
-a complete candidate remains separate from the latest scoped run. No fleet
-enrollment or runner authorization changes are part of this increment.
+The operator approved `reporting-policy.json` on 2026-09-28: fleet green requires
+a complete eligible sweep plus current per-repository evidence, both within
+24 hours. Required CI coverage must also be current and verified. Missing
+evidence remains UNVERIFIED; configuring the acceptance rule does not establish
+a baseline. No fleet enrollment or runner authorization changes are part of
+this increment.
 
-The policy evaluator is implemented with no active policy file. An explicitly
-configured `reporting-policy.json` schema 1 can supply `fleet.mode` as
+The evaluator reads `reporting-policy.json` schema 1 with `fleet.mode` as
 `sweep-and-current` or `sweep-only` and `fleet.max_age_hours`. An absent, malformed,
 future-dated, stale or incomplete evidence set stays UNVERIFIED. Both modes
 require current successful CI coverage for remote repositories; local-only is
@@ -90,9 +91,13 @@ even if stdout contains object-like timestamps.
 
 Restore phases use their own structured fields. A phase not reached is unknown.
 A failed snapshot/live comparison is not labeled corruption. Overall recovery
-remains unverified until Agency supplies an agreed snapshot-consistent recovery
-objective and current offsite/restore proof. Existing freshness tolerances are
-retained for individual observations; they are not a new approved recovery target.
+remains unverified until Agency supplies authoritative snapshot-consistent
+recovery and current offsite/restore proof. The approved policy assigns Agency
+implementation ownership, QA reporting ownership, and a maximum recovery-point
+age of 24 hours. Offsite object age uses the exact elapsed time for that bound;
+a 24-hour-plus-one-second object is stale. Legacy phase observations retain
+their separate 48-hour drill freshness tolerance and cannot approve the
+24-hour recovery objective or prove snapshot consistency.
 
 ## Registry drift
 
@@ -102,8 +107,20 @@ unreadable or malformed sources. It does not automatically fix Agency's registry
 Linked task checkouts share their registered source's Git common identity;
 they do not become new repositories or acquire separate test obligations.
 Archived disk-only storage retains its existing no-test treatment. Registered
-archived rows missing from the other registry remain unresolved drift until an
-explicit exemption policy is approved; no test entrypoints are added for them.
+archived rows missing from the other registry remain unresolved drift except
+for the approved bean-llm and gateway-poc exemptions. Each exemption requires
+the exact configured name/path, an Agency `archived: true` row and an archive
+path; missing paths and active/moved identities still fail. Malformed exemption
+policy fails closed. The Agency identities and owner remain recorded without
+adding QA rows or test entrypoints.
+
+## Recovery retention
+
+Recovery copies must remain for at least 30 days. Their owners must review
+them before any disposal; policy contains `automatic_deletion: false`. This is
+a preservation rule, not retirement authority or an automatic cleanup job.
+Checkout retirement still requires verified payload recovery and task/owner
+clearance, including explicit adjudication of missing registrations.
 
 ## Integration boundary
 

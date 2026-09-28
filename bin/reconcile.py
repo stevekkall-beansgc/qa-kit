@@ -59,10 +59,11 @@ def disk_repos():
     return found
 
 
-def registry_drift(qa, agency, disk, path_exists=None):
+def registry_drift(qa, agency, disk, path_exists=None, exemptions=None):
     """Each live row belongs in each registry; archive storage adds no tests."""
     path_exists = path_exists or (lambda p: expand(p).exists())
     problems, unregistered = [], []
+    exemptions = exemptions or {}
     registries = [('QA', qa), ('Agency', agency)]
     maps = {}
     identities = {}
@@ -89,6 +90,10 @@ def registry_drift(qa, agency, disk, path_exists=None):
         other = 'Agency' if label == 'QA' else 'QA'
         for row in rows:
             if row['name'] not in maps[other]:
+                exempt = exemptions.get(row['name'])
+                if label == 'Agency' and isinstance(exempt,dict) and row.get('archived') is True and \
+                    str(expand(row['path'])) == str(expand(exempt['path'])) and 'archive' in expand(row['path']).parts:
+                    continue
                 problems.append(f'{other} missing row: {row["name"]} (present in {label})')
     for path, name in disk.items():
         # Deliberately archived assets do not acquire validation requirements.
@@ -113,6 +118,22 @@ def read_registry(path):
     return data
 
 
+def read_exemptions(path):
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text())
+    if not isinstance(data,dict) or data.get('schema_version') != 1 or not isinstance(data.get('registry'),dict):
+        raise ValueError('invalid reporting exemption policy')
+    rows = data['registry'].get('archived_exemptions')
+    if not isinstance(rows,list) or any(not isinstance(r,dict) or
+        any(not isinstance(r.get(k),str) or not r[k] for k in ('name','path','owner')) or
+        'archive' not in expand(r['path']).parts for r in rows):
+        raise ValueError('invalid archived exemption identity')
+    if len({r['name'] for r in rows}) != len(rows):
+        raise ValueError('duplicate archived exemption')
+    return {r['name']:r for r in rows}
+
+
 def main():
     fix = "--fix" in sys.argv
     try:
@@ -130,8 +151,13 @@ def main():
     except (OSError, ValueError) as exc:
         print(f'DRIFT: unreadable Agency registry: {type(exc).__name__}; no automatic changes')
         sys.exit(1)
+    try:
+        exemptions = read_exemptions(HERE/'reporting-policy.json')
+    except (OSError,ValueError) as exc:
+        print(f'DRIFT: unreadable/malformed exemption policy: {type(exc).__name__}; no automatic changes')
+        sys.exit(1)
     disk = disk_repos()
-    problems, unregistered = registry_drift(man['repos'], other['repos'], disk)
+    problems, unregistered = registry_drift(man['repos'], other['repos'], disk, exemptions=exemptions)
     if fix:
         for path, name in unregistered:
             if any(row['name'] == name for row in man['repos']):

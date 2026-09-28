@@ -145,8 +145,8 @@ def backups():
         if stamps:
             newest = max(stamps)
             t = datetime.strptime(newest, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-            age_h = int((datetime.now(timezone.utc) - t).total_seconds() // 3600)
-            out.append(("DB offsite (GCS)", f"newest object {age_h}h old", 0 <= age_h <= 24))
+            age_h = (datetime.now(timezone.utc) - t).total_seconds() / 3600
+            out.append(("DB offsite (GCS)", f"newest object {age_h:.1f}h old", 0 <= age_h <= 24))
         else:
             out.append(("DB offsite (GCS)", "no timestamped objects found", False))
     except Exception as e:
@@ -154,7 +154,7 @@ def backups():
     # 4. restore drill (scheduled e2e proof backups are restorable)
     try:
         d = json.loads((Path.home() / "beans/platform/agency/logs/restore-drill.json").read_text())
-        out.extend(restore_status(d))
+        out.extend(restore_status(d, policy=(load_policy() or {}).get('recovery')))
     except Exception as e:
         out.append(("Restore drill", f"no result: {str(e)[:40]}", False))
     # 5. full-runbook rehearsal doctor (quarterly)
@@ -178,7 +178,7 @@ def sync_status(output, duration=None):
     return ('gcssync (launchd)', detail, None)
 
 
-def restore_status(data, now=None):
+def restore_status(data, now=None, policy=None):
     now = now or datetime.now(timezone.utc)
     when = timestamp(data.get('when'))
     age = (now - when).total_seconds()/3600 if when else None
@@ -193,7 +193,10 @@ def restore_status(data, now=None):
             detail = 'failed snapshot/live comparison; consistency unverified'
         detail += f" · {int(age)}h ago" if age is not None else ' · age unknown'
         rows.append((f'Restore drill ({mode})', detail, ok))
-    rows.append(('Restore drill overall', 'snapshot recovery objective pending; phase results shown separately',
+    objective = 'snapshot recovery objective pending; phase results shown separately'
+    if isinstance(policy,dict) and policy.get('consistency')=='snapshot-consistent':
+        objective = f"{policy.get('owner','unknown')} snapshot-consistent recovery <= {policy.get('max_recovery_point_age_hours','unknown')}h; authoritative recovery proof unavailable"
+    rows.append(('Restore drill overall', objective,
                  False if data.get('overall') is False else None))
     return rows
 
@@ -403,6 +406,7 @@ def main():
     data = {
         "schema_version": 2,
         "contract_version": CONTRACT_VERSION,
+        "reporting_policy": policy,
         "generated": now,
         "services": services() + backups(),
         "repos": [(name,row['state'],row['url'],row['ok']) for name,row in ci.items()],

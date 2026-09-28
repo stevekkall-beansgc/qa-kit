@@ -29,6 +29,10 @@ class FleetPolicyTests(unittest.TestCase):
         self.qa['fleet_candidate']=None
         self.assertEqual(evaluate(self.qa,self.ci,self.policy,self.now)['verdict'],'UNVERIFIED')
 
+    def test_evidence_just_over_24_hours_cannot_pass(self):
+        self.qa['fleet_candidate']['when']='20260927T155959Z'
+        self.assertEqual(evaluate(self.qa,self.ci,self.policy,self.now)['verdict'],'UNVERIFIED')
+
     def test_stale_sweep_and_newer_unrelated_failure_cannot_go_green(self):
         for mutate in [lambda:self.qa['fleet_candidate'].update(when='20260926T120000Z'),
                        lambda:self.qa['per_repo'].update(two={'verdict':'FAIL','when':'20260928T150000Z'})]:
