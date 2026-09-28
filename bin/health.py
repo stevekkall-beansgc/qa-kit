@@ -17,7 +17,7 @@ import re
 from html import escape
 from datetime import datetime, timezone
 from pathlib import Path
-from reporting import repo_remote, ci_verdict, normalize_state, timestamp, identity, receipt_order, valid_evidence
+from reporting import CONTRACT_VERSION, repo_remote, ci_verdict, normalize_state, timestamp, identity, receipt_order, valid_evidence
 import hashlib
 from fleet_policy import evaluate as evaluate_fleet
 
@@ -401,6 +401,8 @@ def main():
     ci = ci_evidence()
     policy = load_policy() or {}
     data = {
+        "schema_version": 2,
+        "contract_version": CONTRACT_VERSION,
         "generated": now,
         "services": services() + backups(),
         "repos": [(name,row['state'],row['url'],row['ok']) for name,row in ci.items()],

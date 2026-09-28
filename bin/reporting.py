@@ -4,6 +4,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+CONTRACT_VERSION = 'v1.0'
+
 
 def git_value(path, *args):
     try:
@@ -90,7 +92,8 @@ def normalize_state(raw, names):
         normalized[name] = {'last_run_id': value if isinstance(value, int) and not isinstance(value, bool) else 0,
                             'state': old.get('state', 'unknown'),
                             'verified': old.get('verified')}
-    return {'schema_version': 2, 'attempted': raw.get('attempted', raw.get('checked')),
+    return {'schema_version': 2, 'contract_version': CONTRACT_VERSION,
+            'attempted': raw.get('attempted', raw.get('checked')),
             'verified': raw.get('verified') if raw.get('schema_version') == 2 else None,
             'repos': normalized}
 

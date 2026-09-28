@@ -18,6 +18,19 @@ import reconcile
 
 
 class ReportingIntegrity(unittest.TestCase):
+    def test_dashboard_serializes_unknown_with_explicit_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);manifest=root/'manifest.json';manifest.write_text('{"repos":[]}')
+            with mock.patch.object(health,'PUBLIC',root/'public'),mock.patch.object(health,'HERE',root),mock.patch.object(health,'MANIFEST',manifest), \
+                 mock.patch.object(health,'ci_evidence',return_value={'one':{'state':'unknown','url':'','ok':None}}), \
+                 mock.patch.object(health,'services',return_value=[]),mock.patch.object(health,'backups',return_value=[]),contextlib.redirect_stdout(io.StringIO()):
+                health.main()
+            data=json.loads((root/'public/health.json').read_text())
+            self.assertEqual((data['schema_version'],data['contract_version']),(2,'v1.0'))
+            self.assertIsNone(data['repos'][0][3])
+            self.assertNotEqual(data['qa']['verdict'],'PASS')
+            self.assertNotIn('checked',data['monitors'])
+
     def test_download_failure_is_not_mislabeled_as_snapshot_comparison(self):
         rows=health.restore_status({'when':'2026-09-28T12:00:00Z','offsite':{'ok':False,'detail':'GCS download failed'},'overall':False})
         self.assertNotIn('comparison',rows[1][1])

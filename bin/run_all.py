@@ -29,7 +29,7 @@ import platform
 import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
-from reporting import identity
+from reporting import CONTRACT_VERSION, identity
 
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
@@ -140,7 +140,7 @@ def main():
         sys.exit(2)
     selected = [repo for repo in man['repos'] if (not args.only or repo['name']==args.only)
                 and repo.get('status') != 'planned']
-    evidence = {'schema_version':1,'source':identity(HERE),
+    evidence = {'schema_version':1,'contract_version':CONTRACT_VERSION,'source':identity(HERE),
                 'manifest':{'path':str(manifest_path.resolve()),'sha256':None},
                 'selection':{'only':args.only,'tiers':kinds,'include_planned':args.include_planned,
                              'repos':[r['name'] for r in selected]},

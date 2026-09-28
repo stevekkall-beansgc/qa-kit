@@ -5,6 +5,24 @@ repository is displayed with its repository names and check kinds; it cannot
 replace the latest known failure of another repository. Per-repository results
 are scoped observations, with their timestamps, not release approval.
 
+## Version and migration
+
+`bin/reporting.py` declares `CONTRACT_VERSION = 'v1.0'`. The dashboard's
+`health.json` has `schema_version: 2` and `contract_version: "v1.0"`; CI state
+uses schema 2, and additive runner evidence uses schema 1. Each carries the
+reporting contract version independently of the eventual repository release.
+
+Machine consumers must migrate before adopting this reporting increment:
+repository/service verdicts can be JSON `null` for unknown, the fleet `qa.verdict`
+can be UNVERIFIED, and monitor `checked` is replaced by `attempted` and `verified`.
+A verified query timestamp is not a passed test or full required-workflow proof.
+Legacy receipts remain readable as scoped observations. Legacy CI wrapper
+timestamps become attempts only; the next monitor run writes the normalized
+state atomically. No current state file is changed by preparing this source.
+These semantic changes require a major repository release under the Bean
+release standard; publication, consumer migration and deployment remain
+separate from local validation and review.
+
 ## Receipt provenance
 
 `run_all.py` preserves its existing result fields, commands, ordering and exit
