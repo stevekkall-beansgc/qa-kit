@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -160,7 +161,8 @@ class ReportingIntegrity(unittest.TestCase):
         self.assertIn('last exit 0',health.sync_status('state = running\npid = 42\nlast exit code = 0')[1])
 
     def test_offsite_restore_failure_attributed_separately(self):
-        rows=health.restore_status({'when':'2026-09-28T00:00:00Z','local':{'ok':True},'offsite':{'ok':False},'overall':False})
+        rows=health.restore_status({'when':'2026-09-28T00:00:00Z','local':{'ok':True},'offsite':{'ok':False},'overall':False},
+                                  now=datetime(2026,9,28,16,tzinfo=timezone.utc))
         self.assertTrue(rows[0][2])
         self.assertFalse(rows[1][2])
 
