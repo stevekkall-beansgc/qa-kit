@@ -5,9 +5,10 @@ Enumerates git repos actually on disk (beans layout + known legacy paths),
 then diffs against BOTH registries: this manifest and agency's repos.json.
 
 Fails (exit 1) on:
-  - a repo on disk missing from qa-kit manifest   -> registration drift
+  - a live repo missing from either registry     -> registration drift
   - a manifest/repos.json row pointing at a dead path
-Planned repos are reported but not failures.
+Archived disk-only storage adds no test requirements. Registered dormant
+exemptions require explicit policy; unreadable registries fail closed.
 
 `--fix` appends stub manifest rows (status=planned, gap=auto-detected) for
 unregistered disk repos so humans/agents graduate them on next touch.
@@ -57,57 +58,81 @@ def disk_repos():
     return found
 
 
+def registry_drift(qa, agency, disk, path_exists=None):
+    """Each live row belongs in each registry; archive storage adds no tests."""
+    path_exists = path_exists or (lambda p: expand(p).exists())
+    problems, unregistered = [], []
+    registries = [('QA', qa), ('Agency', agency)]
+    maps = {}
+    for label, rows in registries:
+        mapping = {}
+        for row in rows:
+            name = row['name']; path = str(expand(row['path']))
+            if name in mapping:
+                problems.append(f'{label} duplicate name: {name}')
+            mapping[name] = path
+            if not path_exists(path):
+                problems.append(f'{label} row {name} path missing: {path}')
+        maps[label] = mapping
+    for name in set(maps['QA']) & set(maps['Agency']):
+        if maps['QA'][name] != maps['Agency'][name]:
+            problems.append(f'registry path mismatch: {name}')
+    for label, rows in registries:
+        other = 'Agency' if label == 'QA' else 'QA'
+        for row in rows:
+            if row['name'] not in maps[other]:
+                problems.append(f'{other} missing row: {row["name"]} (present in {label})')
+    for path, name in disk.items():
+        # Deliberately archived assets do not acquire validation requirements.
+        if 'archive' in Path(path).parts:
+            continue
+        missing = [label for label in maps if path not in maps[label].values()]
+        if missing:
+            problems.append(f'repo on disk missing from {" and ".join(missing)}: {path}')
+            if 'QA' in missing:
+                unregistered.append((path, name))
+    return problems, unregistered
+
+
+def read_registry(path):
+    data = json.loads(path.read_text())
+    rows = data.get('repos') if isinstance(data, dict) else None
+    if not isinstance(rows, list) or any(not isinstance(r, dict) or
+        not isinstance(r.get('name'), str) or not isinstance(r.get('path'), str) for r in rows):
+        raise ValueError('expected repos list with name/path rows')
+    return data
+
+
 def main():
     fix = "--fix" in sys.argv
-    man = json.loads(MANIFEST.read_text())
-    manifest_names = {r["name"] for r in man["repos"]}
-    manifest_paths = {str(expand(r["path"])) for r in man["repos"]}
+    try:
+        man = read_registry(MANIFEST)
+    except (OSError, ValueError) as exc:
+        print(f'DRIFT: unreadable QA registry: {type(exc).__name__}')
+        sys.exit(1)
 
     repos_json_path = BEANS / "platform" / "agency" / "repos.json"
     if not repos_json_path.exists():
-        repos_json_path = Path.home() / "agency" / "repos.json"
-    registries_other = set()
-    if repos_json_path.exists():
-        try:
-            other = json.loads(repos_json_path.read_text())
-            for r in other.get("repos", []):
-                registries_other.add(r["name"])
-                manifest_paths.add(str(expand(r["path"])))
-        except Exception as e:
-            print(f"WARN: unreadable {repos_json_path}: {e}")
-
-    problems = []
-
-    # 1. Registered paths that vanished (mid-migration or deleted).
-    for r in man["repos"]:
-        if r.get("status") == "planned":
-            continue
-        p = expand(r["path"])
-        if not p.exists():
-            problems.append(f"manifest row '{r['name']}' path missing: {p}")
-
-    # 2. Disk repos absent from BOTH registries. Archive-group repos are
-    #    informational only (cold storage — no test expectations).
-    unregistered, archived_hits = [], []
-    for path, name in disk_repos().items():
-        if name in manifest_names or name in registries_other:
-            continue
-        if str(path) in manifest_paths:
-            continue
-        if "/archive/" in path or Path(path).parent.name == "archive":
-            archived_hits.append((path, name))
-            print(f"INFO: archived repo (no registry expectation): {path}")
-            continue
-        unregistered.append((path, name))
-        problems.append(f"repo on disk not in any registry: {path}")
-        if fix:
+        if LEGACY:
+            repos_json_path = LEGACY[-1] / "repos.json"
+    try:
+        other = read_registry(repos_json_path)
+    except (OSError, ValueError) as exc:
+        print(f'DRIFT: unreadable Agency registry: {type(exc).__name__}; no automatic changes')
+        sys.exit(1)
+    disk = disk_repos()
+    problems, unregistered = registry_drift(man['repos'], other['repos'], disk)
+    if fix:
+        for path, name in unregistered:
+            if any(row['name'] == name for row in man['repos']):
+                continue
             man["repos"].append({
                 "name": name, "path": str(path).replace(str(Path.home()), "~"),
                 "tier": "C", "status": "planned",
                 "gap": "auto-detected by reconcile.py --fix; needs entrypoints + review",
             })
 
-    print(f"disk repos scanned: {len(disk_repos())}; manifest: {len(man['repos'])} rows")
+    print(f"disk repos scanned: {len(disk)}; manifest: {len(man['repos'])} rows")
     for p in problems:
         print(f"DRIFT: {p}")
     if not problems:

@@ -24,8 +24,12 @@ import json
 import subprocess
 import sys
 import time
+import os
+import platform
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
+from reporting import identity
 
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
@@ -124,11 +128,41 @@ def main():
     kinds = ["unit", "e2e"] if args.all else (["e2e"] if args.e2e else ["unit"])
     manifest_path = expand(args.manifest) if args.manifest else MANIFEST
     logs_dir = expand(args.logs_dir) if args.logs_dir else LOGS
+    manifest_bytes = None
+    try:
+        manifest_bytes = manifest_path.read_bytes()
+    except OSError:
+        pass
     try:
         man = load_manifest(manifest_path)
     except QaKitError as exc:
         print(f"qa-kit error: {exc}", file=sys.stderr)
         sys.exit(2)
+    selected = [repo for repo in man['repos'] if (not args.only or repo['name']==args.only)
+                and repo.get('status') != 'planned']
+    evidence = {'schema_version':1,'source':identity(HERE),
+                'manifest':{'path':str(manifest_path.resolve()),'sha256':None},
+                'selection':{'only':args.only,'tiers':kinds,'include_planned':args.include_planned,
+                             'repos':[r['name'] for r in selected]},
+                'runtime':{'python':platform.python_version(),'platform':platform.system(),
+                           'ci':os.environ.get('CI')=='true'},
+                'repos':{},'expected_checks':[],'collection_errors':[]}
+    try:
+        if manifest_bytes is not None and json.loads(manifest_bytes)==man:
+            evidence['manifest']['sha256'] = hashlib.sha256(manifest_bytes).hexdigest()
+        else:
+            evidence['collection_errors'].append('manifest bytes unavailable or changed during loading')
+    except (ValueError, UnicodeError):
+        evidence['collection_errors'].append('manifest bytes unparseable')
+    for repo in selected:
+        name = repo['name']
+        evidence['repos'][name] = {'before':identity(repo.get('path','/nonexistent'))}
+        expected = ['docs']+[kind for kind in kinds if (repo.get(kind) or {}).get('cmd') or kind=='unit']
+        if (repo.get('setup') or {}).get('cmd') and any((repo.get(kind) or {}).get('cmd') for kind in kinds):
+            expected.append('setup')
+        if repo.get('validation'):
+            expected.append('validation')
+        evidence['expected_checks'].extend({'repo':name,'kind':kind} for kind in expected)
     results, skipped = [], []
     for repo in man["repos"]:
         if args.only and repo["name"] != args.only:
@@ -173,9 +207,19 @@ def main():
     print(f"\n{len(results) - len(failed)}/{len(results)} passed"
           + (f" · {len(skipped)} planned" if skipped else ""))
 
+    for repo in selected:
+        evidence['repos'][repo['name']]['after'] = identity(repo.get('path','/nonexistent'))
+    try:
+        if manifest_path.read_bytes() != manifest_bytes:
+            evidence['collection_errors'].append('manifest changed during execution')
+            evidence['manifest']['sha256'] = None
+    except OSError:
+        evidence['collection_errors'].append('manifest unavailable after execution')
+        evidence['manifest']['sha256'] = None
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     payload = json.dumps(
-        {"when": stamp, "results": results, "planned_skipped": skipped}, indent=2)
+        {"when": stamp, "results": results, "planned_skipped": skipped,
+         "evidence":evidence}, indent=2)
     try:
         logs_dir.mkdir(parents=True, exist_ok=True)
         base = logs_dir / f"run-{stamp}.json"
