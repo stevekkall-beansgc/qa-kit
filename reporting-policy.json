@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "fleet": {
+    "mode": "sweep-and-current",
+    "max_age_hours": 24
+  },
+  "recovery": {
+    "owner": "agency",
+    "reporting_owner": "qa-kit",
+    "consistency": "snapshot-consistent",
+    "max_recovery_point_age_hours": 24
+  },
+  "registry": {
+    "archived_exemptions": [
+      {
+        "name": "bean-llm",
+        "path": "~/beans/archive/bean-llm",
+        "owner": "agency"
+      },
+      {
+        "name": "gateway-poc",
+        "path": "~/beans/archive/gateway-poc",
+        "owner": "agency"
+      }
+    ]
+  },
+  "retention": {
+    "minimum_days": 30,
+    "owner_review_before_disposal": true,
+    "automatic_deletion": false
+  }
+}

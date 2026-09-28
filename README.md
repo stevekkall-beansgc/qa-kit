@@ -9,6 +9,9 @@ private Legume Labs workspace are separated in
 [Legume Labs fleet operations](#beanlabs-fleet-operations-private-workspace).
 
 > **Engineering standards:** [STANDARDS.md](STANDARDS.md)
+
+Fleet dashboards distinguish scoped QA results, unknown CI coverage and backup
+recovery evidence. See [reporting evidence and receipt provenance](REPORTING-EVIDENCE.md).
 >
 > **Publication and portfolio reviews:** [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
 >
