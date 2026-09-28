@@ -17,6 +17,14 @@ import reconcile
 
 
 class ReportingIntegrity(unittest.TestCase):
+    def test_success_for_previous_main_commit_cannot_be_current_ci(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest=Path(directory)/'manifest.json'
+            manifest.write_text(json.dumps({'repos':[{'name':'one','path':directory}]}))
+            runs=[{'conclusion':'success','status':'completed','headSha':'old','createdAt':'2026-09-28T12:00:00Z','url':'url'}]
+            with mock.patch.object(health,'MANIFEST',manifest),mock.patch.object(health,'repo_remote',return_value=('remote','url')),mock.patch.object(health,'gh',side_effect=[runs,{'sha':'current'}]):
+                self.assertIsNone(health.ci_rows()[0][3])
+
     def test_later_collision_failure_supersedes_base_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);(root/'logs').mkdir();manifest=root/'manifest.json'

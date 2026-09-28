@@ -63,6 +63,12 @@ def valid_evidence(value):
     for pair in value.get('repos', {}).values():
         if not isinstance(pair, dict) or any(key in pair and not isinstance(pair[key], dict) for key in ('before','after')):
             return False
+    selection = value.get('selection',{})
+    for key in ('repos','tiers'):
+        if key in selection and (not isinstance(selection[key],list) or any(not isinstance(v,str) for v in selection[key])):
+            return False
+    if 'collection_errors' in value and not isinstance(value['collection_errors'],list):
+        return False
     return True
 
 

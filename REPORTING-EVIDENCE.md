@@ -32,9 +32,20 @@ and known clean, unchanged before/after repository identities matching current
 local identities. Candidate proof does not establish remote CI or approved age.
 
 **Fleet coverage and maximum age are pending an owner decision.** Until that
-policy and its CI acceptance rules are implemented, fleet status is UNVERIFIED;
+policy and its CI acceptance rules are configured, fleet status is UNVERIFIED;
 a complete candidate remains separate from the latest scoped run. No fleet
 enrollment or runner authorization changes are part of this increment.
+
+The policy evaluator is implemented with no active policy file. An explicitly
+configured `reporting-policy.json` schema 1 can supply `fleet.mode` as
+`sweep-and-current` or `sweep-only` and `fleet.max_age_hours`. An absent, malformed,
+future-dated, stale or incomplete evidence set stays UNVERIFIED. Both modes
+require current successful CI coverage for remote repositories; local-only is
+explicitly exempt from remote CI. Current CI observations retain query time,
+run creation time and commit, and successful runs are compared to freshly queried
+branch HEAD. These are latest-run observations. Required-workflow coverage
+remains unverified until the separately owned fleet control contract supplies
+that proof; a single successful workflow never qualifies the entire CI lane.
 
 ## CI monitor and dashboard
 

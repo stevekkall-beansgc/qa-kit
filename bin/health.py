@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from reporting import repo_remote, ci_verdict, normalize_state, timestamp, identity, receipt_order, valid_evidence
 import hashlib
+from fleet_policy import evaluate as evaluate_fleet
 
 import shutil
 GH_BIN = shutil.which("gh") or "/opt/homebrew/bin/gh"  # launchd PATH lacks homebrew
@@ -195,28 +196,55 @@ def restore_status(data, now=None):
     return rows
 
 
-def ci_rows():
+def ci_evidence():
     man = json.loads(MANIFEST.read_text())
-    rows = []
+    rows = {}
+    queried = datetime.now(timezone.utc).isoformat()
     for repo in man["repos"]:
+        name = repo['name']
+        row = {'state':'unknown','url':'','ok':None,'head_verified':False,'coverage_verified':False,
+               'scope':'latest branch run; required workflow coverage unverified',
+               'when':None,'head':None,'current_head':None,'queried_at':queried}
+        rows[name] = row
         if repo.get("status") == "planned":
-            rows.append((repo["name"], "planned", "", False))
+            row['state'] = 'planned'
             continue
-        name = repo["name"]
         gh_name = repo.get("github", name)
         remote_state, _ = repo_remote(repo['path'])
         if remote_state != 'remote':
-            rows.append((name, remote_state, '', None))
+            row['state'] = remote_state
             continue
+        branch = repo.get('default_branch','main')
         runs = gh(["run", "list", "--repo", f"{OWNER}/{gh_name}",
-                   "--branch", "main", "--limit", "1",
+                   "--branch", branch, "--limit", "1",
                    "--json", "conclusion,url,displayTitle,status,headSha,createdAt"])
         state, url, ok = ci_verdict(runs)
-        rows.append((name, state, url, ok))
+        row.update(state=state,url=url,ok=ok)
+        if isinstance(runs,list) and runs and isinstance(runs[0],dict):
+            row['head'] = runs[0].get('headSha')
+            row['when'] = runs[0].get('createdAt')
+        if ok is True:
+            commit = gh(['api',f'repos/{OWNER}/{gh_name}/commits/{branch}'])
+            row['current_head'] = commit.get('sha') if isinstance(commit,dict) else None
+            row['head_verified'] = bool(row['head']) and row['head']==row['current_head']
+            if not row['head_verified'] or not timestamp(row['when']):
+                row['ok'] = None
     return rows
 
 
-def qa_baseline():
+def ci_rows():
+    return [(name,row['state'],row['url'],row['ok']) for name,row in ci_evidence().items()]
+
+
+def load_policy():
+    try:
+        data=json.loads((HERE/'reporting-policy.json').read_text())
+        return data if isinstance(data,dict) and data.get('schema_version')==1 else None
+    except (OSError,ValueError):
+        return None
+
+
+def qa_baseline(policy=None, ci=None, now=None):
     man = json.loads(MANIFEST.read_text())
     digest = hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
     eligible = {r['name']: r for r in man['repos'] if r.get('status') != 'planned'}
@@ -252,8 +280,20 @@ def qa_baseline():
         for name in names:
             if name in per_repo:
                 owned = [r for r in results if r['repo']==name]
+                evidence = d.get('evidence') or {}
+                pair = evidence.get('repos',{}).get(name,{})
+                before,after = pair.get('before',{}),pair.get('after',{})
+                wanted = {'docs','unit'}
+                for kind in ('setup','e2e'):
+                    if (eligible[name].get(kind) or {}).get('cmd'): wanted.add(kind)
+                if eligible[name].get('validation'): wanted.add('validation')
+                complete = bool(before.get('head')) and before.get('dirty') is False and before==after==current[name] and \
+                    {r['kind'] for r in owned}==wanted and evidence.get('schema_version')==1 and \
+                    evidence.get('source',{}).get('head') and evidence.get('source',{}).get('dirty') is False and \
+                    evidence.get('manifest',{}).get('sha256')==digest and not evidence.get('collection_errors')
                 per_repo[name] = {'verdict':'PASS' if all(r['ok'] for r in owned) else 'FAIL',
                                   'when':when,'checks':sorted({r['kind'] for r in owned}),
+                                  'current_complete':complete,
                                   'source_head':(d.get('evidence') or {}).get('repos',{}).get(name,{}).get('before',{}).get('head')}
         evidence = d.get('evidence') or {}
         expected = {(name,'docs') for name in eligible}
@@ -279,9 +319,13 @@ def qa_baseline():
             candidates.append({'when':when,'total':len(results),'source_head':source['head']})
     verdict = 'never-run' if latest['verdict']=='never-run' else 'UNVERIFIED'
     # No age/coverage policy is silently adopted. Candidates remain separate.
-    return {'verdict':verdict,'when':latest['when'],'total':latest['total'],'failed':latest['failed'],
+    output = {'verdict':verdict,'when':latest['when'],'total':latest['total'],'failed':latest['failed'],
             'latest_run':latest,'per_repo':per_repo,'fleet_candidate':candidates[-1] if candidates else None,
             'policy':'pending owner decision','receipt_errors':errors}
+    if policy is not None:
+        evaluation=evaluate_fleet(output,ci or {},policy,now)
+        output.update(verdict=evaluation['verdict'],policy=evaluation)
+    return output
 
 
 def monitors():
@@ -306,18 +350,26 @@ def html(data):
         return f'<span class="d {cls}"></span>'
     svc = "".join(f"<tr><td>{dot(ok)}</td><td>{escape(n)}</td><td class=m>{escape(detail)}</td></tr>"
                   for n, detail, ok in data["services"])
+    ci = data.get('ci_evidence',{})
+    def ci_detail(name,state):
+        row = ci.get(name,{})
+        suffix = f" · {row['when']} · {str(row.get('head') or 'unknown')[:12]}" if row.get('when') else ''
+        return escape(state+suffix)
     repos = "".join(
         f'<tr><td>{dot(ok, neutral=state in ("running", "queued"))}</td>'
         f'<td><a href="{escape(url,quote=True)}" target="_blank">{escape(n)}</a></td>'
-        f"<td>{escape(state)}</td></tr>" if url else
+        f"<td>{ci_detail(n,state)}</td></tr>" if url else
         f'<tr><td>{dot(ok, neutral=state in ("running", "queued"))}</td>'
-        f'<td>{escape(n)}</td><td>{escape(state)}</td></tr>'
+        f'<td>{escape(n)}</td><td>{ci_detail(n,state)}</td></tr>'
         for n, state, url, ok in data["repos"])
     q = data["qa"]
     mon = data["monitors"]
     latest = q.get('latest_run',{})
     scope = ', '.join(latest.get('repos',[])) or 'none'
     tiers = ', '.join(latest.get('checks',[])) or 'none'
+    policy_detail = q.get('policy','unknown')
+    if isinstance(policy_detail,dict):
+        policy_detail = ' · '.join(policy_detail.get('reasons',[])) or f"{policy_detail['mode']} · max {policy_detail['max_age_hours']}h"
     repo_qa = ''.join(f"<tr><td>{dot(False if row['verdict']=='FAIL' else None)}</td><td>{escape(name)}</td><td>{escape(row['verdict'])} · {escape(', '.join(row['checks']))} · {escape(row['when'])}</td></tr>" for name,row in q.get('per_repo',{}).items())
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <title>Legume Labs fleet health</title><meta http-equiv="refresh" content="300">
@@ -333,8 +385,8 @@ a{{color:#7dd3fc;text-decoration:none}} .sub{{color:#667085;font-size:.85rem}}</
 <p class="sub">generated {data['generated']} · refreshes every 5 min</p>
 <h2>services</h2><table>{svc}</table>
 <h2>repositories · latest main-branch run</h2><table>{repos}</table>
-<h2>qa evidence · fleet policy pending</h2><table>
-<tr><td>{dot(None)}</td><td>fleet baseline</td><td class=m>{escape(q['verdict'])} · {escape(q.get('policy','unknown'))}</td></tr>
+<h2>qa evidence</h2><table>
+<tr><td>{dot(True if q['verdict']=='PASS' else None)}</td><td>fleet baseline</td><td class=m>{escape(q['verdict'])} · {escape(policy_detail)}</td></tr>
 <tr><td>{dot(False if latest.get('verdict')=='FAIL' else None)}</td><td>latest scoped run</td><td class=m>
 {escape(latest.get('verdict',q['verdict']))} · {q['total']} checks · {escape(q['when'])} · repos: {escape(scope)} · checks: {escape(tiers)}</td></tr>
 <tr><td>{dot(None)}</td><td>ci monitor</td><td class=m>
@@ -344,11 +396,14 @@ a{{color:#7dd3fc;text-decoration:none}} .sub{{color:#667085;font-size:.85rem}}</
 
 def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    ci = ci_evidence()
+    policy = load_policy() or {}
     data = {
         "generated": now,
         "services": services() + backups(),
-        "repos": [(n, s, u, ok) for n, s, u, ok in ci_rows()],
-        "qa": qa_baseline(),
+        "repos": [(name,row['state'],row['url'],row['ok']) for name,row in ci.items()],
+        "ci_evidence":ci,
+        "qa": qa_baseline(policy=policy.get('fleet'),ci=ci),
         "monitors": monitors(),
     }
     PUBLIC.mkdir(exist_ok=True)
