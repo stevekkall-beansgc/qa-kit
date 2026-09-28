@@ -146,8 +146,11 @@
         ]
       },
       "e2e": {
-        "note": "live-tick observation is operational (launchd); flock-bypass e2e lands with last_slot work",
-        "cmd": null
+        "note": "offline scheduler/notifier integration uses disposable runtime and fake local delivery; live-tick observation remains operational",
+        "cmd": [
+          "python3",
+          "scripts/offline_scheduler_e2e.py"
+        ]
       }
     },
     {
