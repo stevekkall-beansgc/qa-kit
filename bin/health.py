@@ -188,7 +188,9 @@ def restore_status(data, now=None):
         phase = data.get(mode)
         verdict = phase.get('ok') if isinstance(phase, dict) else None
         ok = (verdict and fresh) if isinstance(verdict, bool) else None
-        detail = 'not reached/unknown' if verdict is None else ('passed' if verdict else 'failed comparison; snapshot consistency unverified')
+        detail = 'not reached/unknown' if verdict is None else ('passed' if verdict else 'failed')
+        if verdict is False and isinstance(phase.get('detail'),str) and 'row mismatch' in phase['detail'].lower():
+            detail = 'failed snapshot/live comparison; consistency unverified'
         detail += f" · {int(age)}h ago" if age is not None else ' · age unknown'
         rows.append((f'Restore drill ({mode})', detail, ok))
     rows.append(('Restore drill overall', 'snapshot recovery objective pending; phase results shown separately',

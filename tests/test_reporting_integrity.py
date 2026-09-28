@@ -17,6 +17,12 @@ import reconcile
 
 
 class ReportingIntegrity(unittest.TestCase):
+    def test_download_failure_is_not_mislabeled_as_snapshot_comparison(self):
+        rows=health.restore_status({'when':'2026-09-28T12:00:00Z','offsite':{'ok':False,'detail':'GCS download failed'},'overall':False})
+        self.assertNotIn('comparison',rows[1][1])
+        comparison=health.restore_status({'when':'2026-09-28T12:00:00Z','local':{'ok':False,'detail':'row mismatch vs live'},'overall':False})
+        self.assertIn('comparison',comparison[0][1])
+
     def test_success_for_previous_main_commit_cannot_be_current_ci(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest=Path(directory)/'manifest.json'
