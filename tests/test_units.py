@@ -108,7 +108,8 @@ class TestManifestContract(unittest.TestCase):
         self.assertIn("venv --clear", setup)
         self.assertIn("-r server/requirements.txt", setup)
 
-    def _run_agency_setup(self, *, clawstr=True, bootstrap=True, pip_exit=0, bootstrap_exit=0):
+    def _run_agency_setup(self, *, clawstr=True, bootstrap=True, pip_exit=0, bootstrap_exit=0,
+                          validation=False, validation_exit=0):
         manifest = json.loads((Path(__file__).resolve().parents[1] / "manifest.json").read_text())
         command = next(repo for repo in manifest["repos"] if repo["name"] == "agency")["setup"]["cmd"]
         with tempfile.TemporaryDirectory() as directory:
@@ -122,6 +123,10 @@ class TestManifestContract(unittest.TestCase):
                 setup.mkdir(parents=True)
                 if bootstrap:
                     (setup / "bootstrap.sh").write_text('echo clawstr >> "$QA_SETUP_TRACE"\nexit "$QA_SETUP_BOOTSTRAP_EXIT"\n')
+            if validation:
+                setup = root / 'setup/qa-validation'
+                setup.mkdir(parents=True)
+                (setup/'bootstrap.sh').write_text('echo validation >> "$QA_SETUP_TRACE"\nexit '+str(validation_exit)+'\n')
             trace = root / "trace"
             env = dict(os.environ, QA_SETUP_TRACE=str(trace), QA_SETUP_PIP_EXIT=str(pip_exit),
                        QA_SETUP_BOOTSTRAP_EXIT=str(bootstrap_exit))
@@ -142,6 +147,15 @@ class TestManifestContract(unittest.TestCase):
 
     def test_agency_setup_stops_after_python_install_failure(self):
         self.assertEqual(self._run_agency_setup(pip_exit=19), (19, ["python"]))
+
+    def test_agency_setup_bootstraps_owned_validation_fixture_when_present(self):
+        self.assertEqual(self._run_agency_setup(validation=True), (0,['python','clawstr','validation']))
+
+    def test_agency_setup_validation_bootstrap_failure_propagates(self):
+        self.assertEqual(self._run_agency_setup(validation=True,validation_exit=29), (29,['python','clawstr','validation']))
+
+    def test_agency_setup_failed_clawstr_blocks_validation_bootstrap(self):
+        self.assertEqual(self._run_agency_setup(validation=True,bootstrap_exit=23), (23,['python','clawstr']))
 
 
 if __name__ == "__main__":

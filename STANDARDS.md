@@ -5,7 +5,7 @@ Full requirements live at the link — never duplicate them here. If a
 standard has no home yet, it gets a home before it gets a kernel line.
 
 Owner repo: `qa-kit` · Binding on every session, human or agent.
-Amended: 2026-09-25
+Amended: 2026-09-28
 
 ---
 
@@ -25,6 +25,8 @@ Amended: 2026-09-25
 **Portfolio readiness v1** — assess publication readiness and audience-specific hiring usefulness with the versioned evidence rubric before showcasing a repository. → [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
 
 **Docs standard v1** — every repo carries README (human) + AGENTS.md (agent, Test commands = manifest entrypoint exactly). → [bin/check_docs.py](bin/check_docs.py)
+
+**Validation parity v1** — enrolled repos use centrally required task/variant selections and the shared executor, with exact source/control provenance and separate runner authorization. → [Execution contract](VALIDATION-EXECUTOR.md) · [Fleet design](FLEET-VALIDATION-DESIGN.md) · [Inventory](FLEET-VALIDATION-INVENTORY.md)
 
 **Registry law** — new repos register in manifest.json AND agency/repos.json day one, with tier + entrypoints. → [manifest.json](manifest.json)
 

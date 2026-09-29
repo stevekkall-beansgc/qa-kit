@@ -47,8 +47,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--self-only", action="store_true",
                     help="validate this checkout only; for isolated CI runners")
+    ap.add_argument('--repo', help='validate one registered repo in an exact candidate checkout')
+    ap.add_argument('--root', help='candidate root; requires --repo')
+    ap.add_argument('--manifest', default=str(MANIFEST), help='reviewed manifest owning the unit entrypoint')
     args = ap.parse_args()
-    man = json.loads(MANIFEST.read_text())
+    if bool(args.repo) != bool(args.root) or (args.self_only and args.repo):
+        ap.error('--repo and --root must be supplied together, without --self-only')
+    man = json.loads(Path(args.manifest).read_text())
     failures = []
     checked = 0
     for repo in man["repos"]:
@@ -56,15 +61,17 @@ def main():
             continue
         if args.self_only and repo.get("name") != "qa-kit":
             continue
+        if args.repo and repo.get('name') != args.repo:
+            continue
         checked += 1
-        problems = check(repo, HERE if args.self_only else None)
+        problems = check(repo, Path(args.root).resolve() if args.root else (HERE if args.self_only else None))
         mark = "PASS" if not problems else "FAIL"
         print(f"  [{mark}] {repo['name']}")
         for p in problems:
             print(f"         - {p}")
             failures.append((repo["name"], p))
     print(f"\ndocs standard: {checked - len(failures)}/{checked} repos conform")
-    sys.exit(1 if failures else 0)
+    sys.exit(1 if failures or not checked else 0)
 
 
 if __name__ == "__main__":
