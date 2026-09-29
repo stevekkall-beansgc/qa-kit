@@ -1,8 +1,10 @@
 # Fleet validation: composable profiles and selective management
 
-Status: **design for review, 2026-09-28**. Owner: QA Kit. This package changes
-documentation only. It enrolls no repository and supplies no new executable schema,
-runner routing, workflow, CI pin or release authority.
+Status: **design baseline, 2026-09-28; implementation update 2026-09-29**. Owner:
+QA Kit. The bounded initial implementation is documented in
+[Shared executor v1](VALIDATION-EXECUTOR.md). Its empty registry enrolls no repo.
+The broader catalog, aggregation and native/protected lanes below remain design
+requirements, not claims of implemented or accepted coverage.
 
 Read with the [20-repo inventory](FLEET-VALIDATION-INVENTORY.md),
 [standards index](STANDARDS.md) and

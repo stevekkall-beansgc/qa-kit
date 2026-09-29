@@ -13,7 +13,7 @@ private Legume Labs workspace are separated in
 Fleet dashboards distinguish scoped QA results, unknown CI coverage and backup
 recovery evidence. See [reporting evidence and receipt provenance](REPORTING-EVIDENCE.md).
 >
-> **CI and local validation:** [Fleet profile design](FLEET-VALIDATION-DESIGN.md) · [Inventory](FLEET-VALIDATION-INVENTORY.md) · [Provisional adapter](VALIDATION-PARITY.md)
+> **CI and local validation:** [Shared executor contract](VALIDATION-EXECUTOR.md) · [Fleet design](FLEET-VALIDATION-DESIGN.md) · [Inventory](FLEET-VALIDATION-INVENTORY.md)
 >
 > **Publication and portfolio reviews:** [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
 >

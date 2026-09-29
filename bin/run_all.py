@@ -30,6 +30,7 @@ import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from reporting import CONTRACT_VERSION, identity
+import validation
 
 from check_validation import check as check_validation
 
@@ -129,6 +130,10 @@ def main():
                     help="path to manifest.json (default: this repo's manifest)")
     ap.add_argument("--logs-dir", default=None,
                     help="directory for run-*.json reports (default: logs/)")
+    ap.add_argument('--validation-registry', default=str(HERE / 'validation' / 'registry.json'))
+    for option in ('bundle','authorization','variant','selection','expected-bundle'):
+        ap.add_argument('--validation-'+option)
+    ap.add_argument('--validation-fixture', action='append', default=[])
     args = ap.parse_args()
 
     kinds = ["unit", "e2e"] if args.all else (["e2e"] if args.e2e else ["unit"])
@@ -141,7 +146,10 @@ def main():
         pass
     try:
         man = load_manifest(manifest_path)
-    except QaKitError as exc:
+        registry, registry_digest = validation.read_json(args.validation_registry, 'qa-kit.validation-registry/v1')
+        validation.fields(registry, ('schema','repos'))
+        validation.require(isinstance(registry['repos'],dict), 'invalid validation registry')
+    except (QaKitError, validation.Invalid, OSError, ValueError) as exc:
         print(f"qa-kit error: {exc}", file=sys.stderr)
         sys.exit(2)
     selected = [repo for repo in man['repos'] if (not args.only or repo['name']==args.only)
@@ -163,11 +171,13 @@ def main():
     for repo in selected:
         name = repo['name']
         evidence['repos'][name] = {'before':identity(repo.get('path','/nonexistent'))}
-        expected = ['docs']+[kind for kind in kinds if (repo.get(kind) or {}).get('cmd') or kind=='unit']
-        if (repo.get('setup') or {}).get('cmd') and any((repo.get(kind) or {}).get('cmd') for kind in kinds):
+        expected = ['docs']+[kind for kind in kinds if (isinstance(repo.get(kind),dict) and repo[kind].get('cmd')) or kind=='unit']
+        if isinstance(repo.get('setup'),dict) and repo['setup'].get('cmd') and any(isinstance(repo.get(kind),dict) and repo[kind].get('cmd') for kind in kinds):
             expected.append('setup')
-        if repo.get('validation'):
+        if 'validation' in repo:
             expected.append('validation')
+        if name in registry['repos']:
+            expected=['docs','validation']
         evidence['expected_checks'].extend({'repo':name,'kind':kind} for kind in expected)
     results, skipped = [], []
     for repo in man["repos"]:
@@ -178,6 +188,31 @@ def main():
                             "gap": repo.get("gap", "no entrypoint registered")})
             continue
         results.append(check_docs(repo))
+        if repo['name'] in registry['repos']:
+            t0=time.monotonic()
+            try:
+                validation.require(all(getattr(args,'validation_'+key) for key in
+                    ('bundle','authorization','variant','selection','expected_bundle')), 'enrolled repo requires explicit pinned validation controls and selection')
+                fixture_paths={}
+                for item in args.validation_fixture:
+                    validation.require('=' in item, 'fixture must be NAME=PATH')
+                    name,path=item.split('=',1)
+                    validation.require(name not in fixture_paths, 'duplicate fixture mapping')
+                    fixture_paths[name]=path
+                receipt=validation.run_validation(root=expand(repo['path']),repo=repo['name'],
+                    registry_path=args.validation_registry,bundle_path=args.validation_bundle,
+                    selection=args.validation_selection,variant=args.validation_variant,
+                    expected_head=evidence['repos'][repo['name']]['before']['head'],context='local',
+                    authorization_path=args.validation_authorization,fixtures=fixture_paths,
+                    expected_bundle=args.validation_expected_bundle)
+            except (validation.Invalid,ValueError) as exc:
+                receipt={'status':'blocked','selection_complete':False,'errors':[str(exc)]}
+            results.append({'repo':repo['name'],'kind':'validation',
+                'ok':receipt['status']=='pass' and receipt['selection_complete'] is True,
+                'secs':round(time.monotonic()-t0,2),'tail':'; '.join(receipt.get('errors',[])) or
+                    ('incomplete required selection' if not receipt['selection_complete'] else ''),
+                'validation':receipt})
+            continue
         runnable = [kind for kind in kinds
                     if isinstance(repo.get(kind), dict) and repo[kind].get("cmd")]
         if "validation" in repo:
@@ -206,7 +241,7 @@ def main():
                 results.append({"repo": repo["name"], "kind": "unit", "ok": False,
                                 "secs": 0, "tail": "no unit entrypoint registered"})
 
-    if not any(r["kind"] in kinds for r in results):
+    if not any(r["kind"] in kinds or (r['kind']=='validation' and r['repo'] in registry['repos']) for r in results):
         results.append({"repo": args.only or "selection", "kind": "selection", "ok": False,
                         "secs": 0, "tail": "zero test entrypoints selected; check --only, tier, and manifest status"})
 

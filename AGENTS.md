@@ -13,6 +13,9 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
   --include-planned`), writes `logs/run-<stamp>.json`.
 - `bin/check_docs.py` — docs standard validator (README + AGENTS.md per
   active repo, section + command consistency).
+- `bin/validation.py` — opt-in shared task/variant planner and executor; protocol
+  and trust boundary in `VALIDATION-EXECUTOR.md`. Empty default registry;
+  enrollment, trusted controls and qualified adapters are separate rollout steps.
 - `FLEET-VALIDATION-DESIGN.md` — review-only composable profile/capability design,
   ownership, authorization, evidence and rollout gates; not an executable schema.
 - `FLEET-VALIDATION-INVENTORY.md` — all QA manifest repos, local-source observations,
