@@ -31,6 +31,7 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
 - Docs standard: `python3 bin/check_docs.py`
 
 ## Test commands
+- Deterministic repository checks (Task 3 and Python 3.12): `task validate`
 - Self-check (docs, standards kernels, and offline regression tests): `bash bin/qa_selfcheck.sh`
 - Full sweep: `python3 bin/run_all.py --all`
 

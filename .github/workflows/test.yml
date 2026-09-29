@@ -14,3 +14,27 @@ jobs:
           python-version: "3.12"
       - run: python3 -m unittest discover -s tests -v
       - run: python3 scripts/check_stdlib.py bin/
+
+  task-validate-local:
+    if: github.repository == 'stevekkall-beansgc/qa-kit' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS, ARM64, beans-mac]
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - name: Verify the existing QA runner before checkout
+        shell: bash
+        run: |
+          test "$RUNNER_NAME" = "beans-macbook-qa-kit"
+          /opt/homebrew/opt/python@3.12/libexec/bin/python3 --version
+          /opt/homebrew/bin/task --version
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Run task validate on macOS ARM64 with Python 3.12
+        shell: bash
+        run: |
+          export PATH="/opt/homebrew/opt/python@3.12/libexec/bin:/opt/homebrew/bin:/usr/bin:/bin"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          task validate

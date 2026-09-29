@@ -145,6 +145,25 @@ CI=true bash bin/qa_selfcheck.sh
 Plain `bash bin/qa_selfcheck.sh` validates all active entries in the default
 fleet manifest and therefore requires that private workspace.
 
+With [Task 3](https://taskfile.dev/docs/installation) installed and `python3`
+resolving to Python 3.12, the shared local entrypoint is:
+
+```bash
+task validate
+```
+
+It runs the existing self-check with `CI=true` (this repository's docs, standards
+and complete regression suite), followed by the standard-library check. The
+Python version check fails before execution if another minor version is selected.
+It does not run the fleet manifest or activate any validation enrollment.
+
+The existing `unittest` GitHub job stays on Ubuntu/Python 3.12 for every pull
+request and main push. A separate `task-validate-local` job runs `task validate`
+on the existing QA macOS ARM64 runner only for pushes to this repository's main
+branch. It verifies the runner name before checking out the event commit; no PR
+event selects this job. Its Mac result is additional evidence and does not
+replace the hosted Ubuntu check or establish cross-platform equivalence.
+
 ## Legume Labs fleet operations (private workspace)
 
 Everything in this section assumes the `~/beans/...` paths in the default
