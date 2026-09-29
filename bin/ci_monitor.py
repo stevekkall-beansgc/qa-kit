@@ -143,7 +143,7 @@ def main():
             print(f"      {f['url']}")
         print("auth_verified=true")
         sys.exit(1)
-    print("query coverage verified — no new failures since last sweep; this is not a fleet CI pass")
+    print("query coverage verified — auth_verified=true; no new failures since last sweep; this is not a fleet CI pass")
 
 
 if __name__ == "__main__":

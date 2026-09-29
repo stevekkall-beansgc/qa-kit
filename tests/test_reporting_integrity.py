@@ -123,6 +123,19 @@ class ReportingIntegrity(unittest.TestCase):
             self.assertIsNone(result['fleet_candidate'])
             self.assertTrue(result['receipt_errors'])
 
+    def test_verified_monitor_completion_carries_scheduler_auth_marker(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);state=root/'state.json';manifest=root/'manifest.json'
+            manifest.write_text(json.dumps({'repos':[{'name':'local','path':directory}]}))
+            output=io.StringIO()
+            with mock.patch.object(ci_monitor,'STATE',state),mock.patch.object(ci_monitor,'MANIFEST',manifest), \
+                 mock.patch.object(ci_monitor,'repo_remote',return_value=('local-only','')), \
+                 mock.patch.object(ci_monitor,'gh',return_value=(0,'verified')),contextlib.redirect_stdout(output):
+                ci_monitor.main()
+            self.assertIn('auth_verified=true',output.getvalue())
+            self.assertIn('not a fleet CI pass',output.getvalue())
+            self.assertNotIn('all green',output.getvalue())
+
     def test_monitor_inflight_failure_does_not_advance_completed_watermark(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);state=root/'state.json';manifest=root/'manifest.json'
