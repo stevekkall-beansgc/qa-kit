@@ -7,8 +7,8 @@ are scoped observations, with their timestamps, not release approval.
 
 ## Version and migration
 
-`bin/reporting.py` declares `CONTRACT_VERSION = 'v1.0'`. The dashboard's
-`health.json` has `schema_version: 2` and `contract_version: "v1.0"`; CI state
+`bin/reporting.py` declares `CONTRACT_VERSION = 'v1.1'`. The dashboard's
+`health.json` has `schema_version: 2` and `contract_version: "v1.1"`; CI state
 uses schema 2, and additive runner evidence uses schema 1. Each carries the
 reporting contract version independently of the eventual repository release.
 
@@ -81,6 +81,37 @@ In-flight runs do not advance the completed-run watermark, so a later failure
 of the same run is still detected. Writes replace the state atomically.
 
 ## Backup evidence
+
+Reporting contract v1.1 adds `health.json.backup_evidence.restore` and `.sync`.
+Existing nullable service/repository tuples and attempted/verified monitor
+watermarks retain their v1.0 meaning. The new summaries contain verdicts,
+phase/error-stage attribution, attempt/verification timestamps, exact recovery
+point and age, receipt/manifest digests; they omit database paths and row payloads.
+
+The consumer validates Agency `agency.restore-proof/v1` and
+`agency.backup-sync/v1` against immutable local proof artifacts. It checks the
+canonical source database identity, reference file/schema/all-table logical
+digests, capture chronology, the actual manifest file and canonical hashes,
+selected LTX ranges/bytes/checksums/generation identities, restored files and
+phase content bindings. Only independently validated local and offsite phases
+against one reference can make overall recovery true. The recovery timestamp
+is the reference transaction boundary established by content equality, never
+object upload time. Age is recomputed against the current clock and exact
+approved maximum; 24 hours plus one second remains unverified.
+
+Generation-pinned downloads and execution provenance remain Agency producer
+responsibilities; QA does not query providers, download objects or execute a
+restore while evaluating artifacts. Missing, changed, malformed, future,
+stale or unsupported proof remains unknown. A failed current attempt remains
+failed and cannot inherit an older success. Sync completion proof is distinct
+from actual offsite restore proof. A structured restore receipt supplies the
+DB offsite recovery row, replacing object-age heuristics for that row.
+
+The legacy failure formatter placed all failures in local and set offsite to
+null. A schema-less receipt in that shape therefore preserves a failed attempt
+but marks both phase verdicts unknown; it cannot establish that offsite was
+skipped. Legacy count mismatches are not corruption evidence.
+
 
 The dashboard separately shows local replication, sync process state/runtime,
 last timestamped successful sync completion, offsite object age, local restore,

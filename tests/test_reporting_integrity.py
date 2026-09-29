@@ -66,7 +66,7 @@ class ReportingIntegrity(unittest.TestCase):
                  mock.patch.object(health,'services',return_value=[]),mock.patch.object(health,'backups',return_value=[]),contextlib.redirect_stdout(io.StringIO()):
                 health.main()
             data=json.loads((root/'public/health.json').read_text())
-            self.assertEqual((data['schema_version'],data['contract_version']),(2,'v1.0'))
+            self.assertEqual((data['schema_version'],data['contract_version']),(2,'v1.1'))
             self.assertIsNone(data['repos'][0][3])
             self.assertNotEqual(data['qa']['verdict'],'PASS')
             self.assertNotIn('checked',data['monitors'])
@@ -76,6 +76,25 @@ class ReportingIntegrity(unittest.TestCase):
         self.assertNotIn('comparison',rows[1][1])
         comparison=health.restore_status({'when':'2026-09-28T12:00:00Z','local':{'ok':False,'detail':'row mismatch vs live'},'overall':False})
         self.assertIn('comparison',comparison[0][1])
+
+    def test_legacy_failure_does_not_trust_broken_phase_attribution(self):
+        rows=health.restore_status({'when':'2026-09-29T10:10:37Z',
+                                   'local':{'ok':False,'detail':'row mismatch vs live'},
+                                   'offsite':None,'overall':False},
+                                  now=datetime(2026,9,29,11,tzinfo=timezone.utc))
+        self.assertIsNone(rows[0][2])
+        self.assertIsNone(rows[1][2])
+        self.assertIn('phase unverified',rows[0][1])
+        self.assertFalse(rows[-1][2])
+
+    def test_schema_marker_and_success_flags_are_not_recovery_proof(self):
+        clock=datetime(2026,9,29,11,tzinfo=timezone.utc)
+        for schema in ['agency.restore-proof/v1','agency.restore-proof/v99']:
+            rows=health.restore_status({'schema':schema,'when':'2026-09-29T10:50:00Z',
+                'local':{'attempted':True,'verified':True,'status':'verified','ok':True},
+                'offsite':{'attempted':True,'verified':True,'status':'verified','ok':True},'overall':True},
+                now=clock,policy={'owner':'agency','consistency':'snapshot-consistent','max_recovery_point_age_hours':24})
+            self.assertTrue(all(row[2] is None for row in rows))
 
     def test_success_for_previous_main_commit_cannot_be_current_ci(self):
         with tempfile.TemporaryDirectory() as directory:

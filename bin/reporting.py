@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-CONTRACT_VERSION = 'v1.0'
+CONTRACT_VERSION = 'v1.1'
 
 
 def git_value(path, *args):
