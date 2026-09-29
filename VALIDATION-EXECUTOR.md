@@ -50,6 +50,11 @@ Required fields:
   timeout_seconds}`. Prerequisites in `after` execute in the same variant.
   Commands are argv arrays, never implicitly evaluated as shell strings.
   The executable must be a declared observed runtime (or its exact resolved path).
+  Subsequent arguments may also be `{"qa_path":"bin/check_docs.py"}` to resolve
+  a tracked regular file inside the pinned executor checkout. Other substitutions
+  are unsupported. For central docs use `python3`, that typed helper argument,
+  `--repo`, the registered slug, `--root`, `.`. The helper checks candidate
+  README/AGENTS content and the unit-command literal from the pinned manifest.
   Timeouts are positive seconds, bounded at four hours.
 - `selections`: map from selection name to nonempty required `task@variant` lists.
 
@@ -67,6 +72,8 @@ sandbox**. Runner isolation and authorization remain mandatory adapter duties.
 Child environments have temporary HOME/TMPDIR, an executor scratch directory,
 and declared interpreter bindings ahead of `/usr/bin:/bin`. Ambient credentials,
 user PATH entries, shell startup overrides and Python import paths are removed.
+`CI` is not inferred from invocation context: declare an explicit literal if a
+task needs it, so local and CI calls receive the same task environment.
 Scripts must declare and review their transitive tools: this is not syscall
 tracing or proof that arbitrary shell code uses no other absolute executable.
 

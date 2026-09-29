@@ -182,7 +182,11 @@ def plan(contract, policy, selection, variant):
     for name, task in tasks.items():
         require(NAME.fullmatch(name), 'invalid task identifier')
         fields(task, ('argv', 'cwd', 'after', 'variants', 'env', 'effects', 'fixtures', 'timeout_seconds'))
-        require(isinstance(task['argv'], list) and task['argv'] and all(isinstance(a,str) and a and '\x00' not in a for a in task['argv']), 'invalid argv')
+        require(isinstance(task['argv'], list) and task['argv'] and isinstance(task['argv'][0],str), 'invalid argv')
+        for argument in task['argv']:
+            require((isinstance(argument,str) and argument and '\x00' not in argument) or
+                    (isinstance(argument,dict) and set(argument)=={'qa_path'} and isinstance(argument['qa_path'],str)),
+                    'invalid argv argument')
         for field in ('after', 'variants', 'effects', 'fixtures'):
             strings(task[field], field, nonempty=field == 'variants')
         require(set(task['after']) <= tasks.keys(), 'unknown prerequisite')
@@ -363,6 +367,16 @@ def run_validation(*, root, repo, registry_path, bundle_path, selection, variant
             require(set(task['effects']) <= set(auth['effects']), 'task effects are not authorized')
             confined(root, task['cwd'])
             environments[task['task']] = environment(root, task['env'], fixture_paths)
+            resolved=[]
+            for argument in task['argv']:
+                if isinstance(argument,dict):
+                    path=confined(Path(qa_root).resolve(),argument['qa_path'])
+                    require(path.is_file(), 'QA helper must be a regular file')
+                    git(qa_root,'ls-files','--error-unmatch','--',argument['qa_path'])
+                    resolved.append(str(path))
+                else:
+                    resolved.append(argument)
+            task['argv']=resolved
             # Check executable before any task can run.
             binary = task['argv'][0]
             aliases = {'python':'python','python3':'python','node':'node','bash':'bash','npm':'npm'}
@@ -393,7 +407,7 @@ def run_validation(*, root, repo, registry_path, bundle_path, selection, variant
             # system utilities follow these bindings, never the user's ambient PATH.
             base_env={'PATH':str(bindings)+':/usr/bin:/bin', 'HOME':scratch, 'TMPDIR':scratch,
                       'LANG':'C.UTF-8','LC_ALL':'C.UTF-8','QA_VALIDATION_SCRATCH':scratch,
-                      'CI':'true' if context == 'ci' else 'false', 'PYTHONNOUSERSITE':'1'}
+                      'PYTHONNOUSERSITE':'1'}
             for task in execution_plan['tasks']:
                 if any(statuses[p] != 'pass' for p in task['after']):
                     record={'task':task['task'], 'status':'blocked', 'reason':'prerequisite failed', 'exit_code':None,'timed_out':False}

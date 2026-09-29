@@ -272,6 +272,45 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(receipt['controls']['qa']['head'],self.qa_head)
         self.assertTrue(receipt['selection_complete'])
 
+    def test_context_does_not_change_task_environment(self):
+        self.authorization['contexts'].append('ci'); self.bundle['adapters']['ci']=self.qa_head
+        (self.root/'check.py').write_text("import os,pathlib\np=pathlib.Path('scratch');p.mkdir(exist_ok=True);(p/'ran').write_text(os.environ.get('CI','absent'))\n")
+        self.sync(); local=self.run_it(); self.assertEqual(local['status'],'pass')
+        local_value=(self.root/'scratch/ran').read_text()
+        ci=self.run_it(context='ci',adapter_root=self.qa,
+            expected_bundle=hashlib.sha256((self.base/'bundle.json').read_bytes()).hexdigest())
+        self.assertEqual(ci['status'],'pass')
+        self.assertEqual((self.root/'scratch/ran').read_text(),local_value)
+
+    def test_tracked_qa_helper_argument(self):
+        (self.qa/'bin/helper.py').write_text('print("central helper")\n')
+        self.bundle['qa_commit']=commit(self.qa)
+        self.contract['tasks']['unit']['argv']=[sys.executable,{'qa_path':'bin/helper.py'}]
+        self.sync(); r=self.run_it(); self.assertEqual(r['status'],'pass',r)
+
+    def test_untracked_qa_helper_cannot_run(self):
+        (self.qa/'.gitignore').write_text('__pycache__/\nbin/untracked.py\n')
+        self.bundle['qa_commit']=commit(self.qa)
+        (self.qa/'bin/untracked.py').write_text('raise SystemExit(0)\n')
+        self.contract['tasks']['unit']['argv']=[sys.executable,{'qa_path':'bin/untracked.py'}]
+        self.sync(); r=self.run_it(); self.assertEqual(r['status'],'blocked',r)
+
+    def test_central_docs_cli_uses_named_repo_and_candidate_root(self):
+        helper=Path(validation.__file__).parent/'check_docs.py'
+        manifest={'repos':[{'name':'sample','path':'/nonexistent','status':'active',
+                           'unit':{'cmd':['python3','check.py']}}]}
+        write_json(self.base/'docs-manifest.json',manifest)
+        (self.root/'README.md').write_text('AGENTS.md')
+        (self.root/'AGENTS.md').write_text('## Test commands\npython3 check.py\n')
+        args=[sys.executable,str(helper),'--repo','sample','--root',str(self.root),
+              '--manifest',str(self.base/'docs-manifest.json')]
+        result=subprocess.run(args,capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        (self.root/'AGENTS.md').write_text('## Test commands\npython3 wrong.py\n')
+        self.assertEqual(subprocess.run(args,capture_output=True).returncode,1)
+        args[args.index('sample')]='missing'
+        self.assertNotEqual(subprocess.run(args,capture_output=True).returncode,0)
+
     def test_real_cli_cancellation_stops_group(self):
         import time
         (self.root/'scratch').mkdir()
