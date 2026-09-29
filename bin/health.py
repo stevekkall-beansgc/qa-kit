@@ -20,6 +20,7 @@ from pathlib import Path
 from reporting import CONTRACT_VERSION, repo_remote, ci_verdict, normalize_state, timestamp, identity, receipt_order, valid_evidence
 import hashlib
 from fleet_policy import evaluate as evaluate_fleet
+from recovery_evidence import RESTORE_SCHEMA, evaluate_restore, evaluate_sync, restore_rows
 
 import shutil
 GH_BIN = shutil.which("gh") or "/opt/homebrew/bin/gh"  # launchd PATH lacks homebrew
@@ -91,11 +92,31 @@ def services():
     return out
 
 
-def backups():
+def backup_evidence():
+    policy = (load_policy() or {}).get('recovery')
+    root = Path.home() / 'beans/platform/agency/logs'
+    result = {}
+    for name, filename, evaluator in [('restore', 'restore-drill.json', evaluate_restore),
+                                      ('sync', 'backup-sync.json', evaluate_sync)]:
+        raw, payload = None, None
+        try:
+            payload = (root / filename).read_bytes()
+            raw = json.loads(payload)
+        except (OSError, ValueError):
+            pass
+        summary = evaluator(raw, policy=policy)
+        summary['input_schema'] = raw.get('schema') if isinstance(raw, dict) else None
+        summary['receipt_sha256'] = hashlib.sha256(payload).hexdigest() if payload is not None else None
+        result[name] = summary
+    return result
+
+
+def backups(evidence=None):
     """Backup-chain probes: litestream local replica, gcssync launchd job,
     GCS offsite freshness. Exists because gcssync failed silently for days —
     nothing else watched the watchmen of the offsite copy."""
     out = []
+    evidence = evidence or backup_evidence()
     # 1. local replica freshness (litestream layer)
     # Healthy = segments keep pace with ACTUAL db writes — a quiet hour is not
     # a failure, so compare against agency.db-wal mtime (5-min slack).
@@ -128,35 +149,47 @@ def backups():
         out.append(sync_status(p.stdout if p.returncode == 0 else '', duration))
     except (OSError, subprocess.TimeoutExpired):
         out.append(('gcssync (launchd)', 'process state unavailable', None))
-    out.append(('gcssync last successful completion', 'no timestamped completion receipt available', None))
-    # 3. offsite freshness via gsutil (absolute interpreter pin — standing rule)
-    gsutil = shutil.which("gsutil") or "/opt/homebrew/bin/gsutil"
-    env = {"PATH": "/usr/bin:/bin:/opt/homebrew/bin",
-           "CLOUDSDK_PYTHON": "/opt/homebrew/bin/python3.12",
-           "HOME": str(Path.home())}
-    try:
-        r = subprocess.run([gsutil, "-q", "ls", "-lR",
-                            "gs://downtown-504818-agency-db/agency/ltx/"],
-                           capture_output=True, text=True, timeout=45, env=env)
-        if r.returncode:
-            raise RuntimeError('offsite query failed; freshness unknown')
-        stamps = [ln.split()[1] for ln in r.stdout.splitlines()
-                  if len(ln.split()) >= 2 and "T" in ln.split()[1] and "Z" in ln.split()[1]]
-        if stamps:
-            newest = max(stamps)
-            t = datetime.strptime(newest, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-            age_h = (datetime.now(timezone.utc) - t).total_seconds() / 3600
-            out.append(("DB offsite (GCS)", f"newest object {age_h:.1f}h old", 0 <= age_h <= 24))
-        else:
-            out.append(("DB offsite (GCS)", "no timestamped objects found", False))
-    except Exception as e:
-        out.append(("DB offsite (GCS)", str(e)[:60], None))
+    sync = evidence['sync']
+    sync_detail = sync['reason'] + (f" · {sync['verified_at']}" if sync['verified_at'] else '')
+    out.append(('gcssync completion', sync_detail, sync['ok']))
+    # Generation-bound restored snapshot proof supersedes object-mtime heuristics.
+    restore = evidence['restore']
+    if restore['input_schema'] == RESTORE_SCHEMA:
+        phase = restore['phases']['offsite']
+        detail = phase['status'] + ' · recovery point ' + str(restore['recovery_point_at'] or 'unverified')
+        out.append(('DB offsite (GCS)', detail, phase['ok']))
+    else:
+        # 3. offsite freshness via gsutil (absolute interpreter pin — standing rule)
+        gsutil = shutil.which("gsutil") or "/opt/homebrew/bin/gsutil"
+        env = {"PATH": "/usr/bin:/bin:/opt/homebrew/bin",
+               "CLOUDSDK_PYTHON": "/opt/homebrew/bin/python3.12",
+               "HOME": str(Path.home())}
+        try:
+            r = subprocess.run([gsutil, "-q", "ls", "-lR",
+                                "gs://downtown-504818-agency-db/agency/ltx/"],
+                               capture_output=True, text=True, timeout=45, env=env)
+            if r.returncode:
+                raise RuntimeError('offsite query failed; freshness unknown')
+            stamps = [ln.split()[1] for ln in r.stdout.splitlines()
+                      if len(ln.split()) >= 2 and "T" in ln.split()[1] and "Z" in ln.split()[1]]
+            if stamps:
+                newest = max(stamps)
+                t = datetime.strptime(newest, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                age_h = (datetime.now(timezone.utc) - t).total_seconds() / 3600
+                out.append(("DB offsite (GCS)", f"newest object {age_h:.1f}h old", 0 <= age_h <= 24))
+            else:
+                out.append(("DB offsite (GCS)", "no timestamped objects found", False))
+        except Exception as e:
+            out.append(("DB offsite (GCS)", str(e)[:60], None))
     # 4. restore drill (scheduled e2e proof backups are restorable)
-    try:
-        d = json.loads((Path.home() / "beans/platform/agency/logs/restore-drill.json").read_text())
-        out.extend(restore_status(d, policy=(load_policy() or {}).get('recovery')))
-    except Exception as e:
-        out.append(("Restore drill", f"no result: {str(e)[:40]}", False))
+    if restore['input_schema'] == RESTORE_SCHEMA:
+        out.extend(restore_rows(restore))
+    else:
+        try:
+            d = json.loads((Path.home() / "beans/platform/agency/logs/restore-drill.json").read_text())
+            out.extend(restore_status(d, policy=(load_policy() or {}).get('recovery')))
+        except Exception:
+            out.append(("Restore drill", "receipt unavailable; recovery unverified", None))
     # 5. full-runbook rehearsal doctor (quarterly)
     try:
         d = json.loads((Path.home() / "beans/platform/agency/logs/runbook-doctor.json").read_text())
@@ -180,10 +213,17 @@ def sync_status(output, duration=None):
 
 def restore_status(data, now=None, policy=None):
     now = now or datetime.now(timezone.utc)
+    if isinstance(data, dict) and data.get('schema'):
+        return restore_rows(evaluate_restore(data, now=now, policy=policy))
     when = timestamp(data.get('when'))
     age = (now - when).total_seconds()/3600 if when else None
     fresh = age is not None and 0 <= age <= 48
     rows = []
+    # The legacy producer ignored fail(mode), storing every failure in local.
+    # Preserve the failed attempt without inventing which phase failed.
+    legacy_ambiguous = (not data.get('schema') and data.get('overall') is False
+                        and isinstance(data.get('local'), dict)
+                        and data['local'].get('ok') is False and data.get('offsite') is None)
     for mode in ('local', 'offsite'):
         phase = data.get(mode)
         verdict = phase.get('ok') if isinstance(phase, dict) else None
@@ -191,6 +231,11 @@ def restore_status(data, now=None, policy=None):
         detail = 'not reached/unknown' if verdict is None else ('passed' if verdict else 'failed')
         if verdict is False and isinstance(phase.get('detail'),str) and 'row mismatch' in phase['detail'].lower():
             detail = 'failed snapshot/live comparison; consistency unverified'
+        if legacy_ambiguous:
+            ok = None
+            failed_detail = data['local'].get('detail', '')
+            comparison = isinstance(failed_detail, str) and 'row mismatch' in failed_detail.lower()
+            detail = ('failed legacy comparison' if comparison else 'failed legacy attempt') + '; phase unverified'
         detail += f" · {int(age)}h ago" if age is not None else ' · age unknown'
         rows.append((f'Restore drill ({mode})', detail, ok))
     objective = 'snapshot recovery objective pending; phase results shown separately'
@@ -403,12 +448,14 @@ def main():
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     ci = ci_evidence()
     policy = load_policy() or {}
+    recovery = backup_evidence()
     data = {
         "schema_version": 2,
         "contract_version": CONTRACT_VERSION,
         "reporting_policy": policy,
         "generated": now,
-        "services": services() + backups(),
+        "services": services() + backups(recovery),
+        "backup_evidence": recovery,
         "repos": [(name,row['state'],row['url'],row['ok']) for name,row in ci.items()],
         "ci_evidence":ci,
         "qa": qa_baseline(policy=policy.get('fleet'),ci=ci),
