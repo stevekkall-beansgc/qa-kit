@@ -43,6 +43,7 @@ def resolve_target(rel: str) -> Path:
 ANCHORS = {
     "Review contract": ("README.md", "regression test"),
     "Docs standard v1": ("bin/check_docs.py", "AGENTS.md"),
+    "Validation parity v1": ("VALIDATION-PARITY.md", "bin/check_validation.py"),
     "Registry law": ("manifest.json", '"repos"'),
     "Gate semantics": ("../gate-kit/bin/compliance.py", "advisory"),
     "Release standard v1": ("../agency/docs/RELEASE-STANDARD.md", None),

@@ -31,6 +31,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from reporting import CONTRACT_VERSION, identity
 
+from check_validation import check as check_validation
+
 HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
 LOGS = HERE / "logs"
@@ -100,8 +102,12 @@ def check_docs(repo):
         ag_text = ag.read_text()
         if "## Test commands" not in ag_text:
             problems.append("AGENTS.md lacks Test commands section")
-        cmd = (repo.get("unit") or {}).get("cmd")
-        if cmd and " ".join(cmd) not in ag_text.replace("`", ""):
+        unit = repo.get("unit") or {}
+        cmd = unit.get("cmd") if isinstance(unit, dict) else None
+        if not isinstance(unit, dict) or (cmd and (not isinstance(cmd, list)
+                                                  or not all(isinstance(arg, str) for arg in cmd))):
+            problems.append("manifest unit command is malformed")
+        elif cmd and " ".join(cmd) not in ag_text.replace("`", ""):
             problems.append("AGENTS.md does not state manifest unit cmd")
     if not rd.exists():
         problems.append("missing README.md")
@@ -172,7 +178,18 @@ def main():
                             "gap": repo.get("gap", "no entrypoint registered")})
             continue
         results.append(check_docs(repo))
-        runnable = [kind for kind in kinds if (repo.get(kind) or {}).get("cmd")]
+        runnable = [kind for kind in kinds
+                    if isinstance(repo.get(kind), dict) and repo[kind].get("cmd")]
+        if "validation" in repo:
+            t0 = time.monotonic()
+            issues = check_validation(repo, runtime=True)
+            results.append({"repo": repo["name"], "kind": "validation", "ok": not issues,
+                            "secs": round(time.monotonic() - t0, 2), "tail": "; ".join(issues)})
+            if issues:
+                for kind in runnable:
+                    results.append({"repo": repo["name"], "kind": kind, "ok": False,
+                                    "secs": 0, "tail": "skipped: validation parity failed"})
+                continue
         if (repo.get("setup") or {}).get("cmd") and runnable:
             stage = run_repo(repo, "setup")
             results.append(stage)

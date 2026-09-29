@@ -13,6 +13,14 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
   --include-planned`), writes `logs/run-<stamp>.json`.
 - `bin/check_docs.py` — docs standard validator (README + AGENTS.md per
   active repo, section + command consistency).
+- `FLEET-VALIDATION-DESIGN.md` — review-only composable profile/capability design,
+  ownership, authorization, evidence and rollout gates; not an executable schema.
+- `FLEET-VALIDATION-INVENTORY.md` — all QA manifest repos, local-source observations,
+  proposed mappings and unknowns; not proof of remote protection or runner health.
+- `VALIDATION-PARITY.md` — provisional Ubuntu adapter contract, not the fleet schema.
+- `bin/check_validation.py` — provisional opt-in contract/workflow/runtime checker; adopted
+  rows fail before tests in `run_all.py` when parity fails. Existing Gate Kit and
+  release preflight pins need explicit integration before they enforce this rule.
 
 ## Commands
 - Everything: `python3 bin/run_all.py --all`

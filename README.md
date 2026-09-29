@@ -13,6 +13,8 @@ private Legume Labs workspace are separated in
 Fleet dashboards distinguish scoped QA results, unknown CI coverage and backup
 recovery evidence. See [reporting evidence and receipt provenance](REPORTING-EVIDENCE.md).
 >
+> **CI and local validation:** [Fleet profile design](FLEET-VALIDATION-DESIGN.md) · [Inventory](FLEET-VALIDATION-INVENTORY.md) · [Provisional adapter](VALIDATION-PARITY.md)
+>
 > **Publication and portfolio reviews:** [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
 >
 > **Private vulnerability reports:** [SECURITY.md](SECURITY.md)
@@ -189,6 +191,14 @@ proof that a public CI run or release passed. Because `gate-kit` is registered
 as `unit-only`, this command does not claim E2E coverage.
 
 ### Review-process contract
+
+Rows explicitly registered for the [provisional Ubuntu adapter](VALIDATION-PARITY.md) get
+an additional `validation` result before their selected test tiers. Contract,
+workflow, command or runtime drift fails the report and blocks those tests.
+No fleet row is enrolled; the current pilot uses synthetic repos. The
+[fleet design](FLEET-VALIDATION-DESIGN.md) proposes composable requirements beyond
+this prototype and records separate ownership, authorization and rollout gates.
+Gate Kit and release preflight integration remain future work.
 
 Binding for every Legume Labs session, human or agent, effective 2026-08-24:
 
