@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "status": "specification-fixtures-not-executed-tests",
+  "policy_version": "1.0.0-draft.1",
+  "health_cases": [
+    {
+      "id": "meets_all_baselines",
+      "ratings": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 75,
+        "coverage": 100,
+        "status": "amber"
+      }
+    },
+    {
+      "id": "fully_supported",
+      "ratings": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 100,
+        "coverage": 100,
+        "status": "green"
+      }
+    },
+    {
+      "id": "green_boundary",
+      "ratings": [
+        4,
+        3,
+        3,
+        3
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 85,
+        "coverage": 100,
+        "status": "green"
+      }
+    },
+    {
+      "id": "floor_not_met",
+      "ratings": [
+        4,
+        4,
+        4,
+        2
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 92.5,
+        "coverage": 100,
+        "status": "amber"
+      }
+    },
+    {
+      "id": "missing_core_evidence",
+      "ratings": [
+        null,
+        4,
+        4,
+        4
+      ],
+      "complete": [
+        false,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 60,
+        "coverage": 60,
+        "status": "unknown"
+      }
+    },
+    {
+      "id": "stale_operations",
+      "ratings": [
+        4,
+        4,
+        4,
+        null
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 85,
+        "coverage": 85,
+        "status": "unknown"
+      }
+    },
+    {
+      "id": "required_failure_overrides_points",
+      "ratings": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [
+        "failed_required_check"
+      ],
+      "expected": {
+        "points": 100,
+        "coverage": 100,
+        "status": "red"
+      }
+    },
+    {
+      "id": "blocker_survives_expiry",
+      "ratings": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "complete": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "blockers": [
+        "broken_supported_core_journey"
+      ],
+      "expected": {
+        "points": 0,
+        "coverage": 0,
+        "status": "red"
+      }
+    },
+    {
+      "id": "complete_low_score",
+      "ratings": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "complete": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "blockers": [],
+      "expected": {
+        "points": 50,
+        "coverage": 100,
+        "status": "red"
+      }
+    }
+  ],
+  "acceptance_requirements": [
+    {
+      "case": "replayed_assessment",
+      "expected": "same ID and canonical content hash produce one retained assessment"
+    },
+    {
+      "case": "conflicting_replay",
+      "expected": "same ID and different hash rejected without replacing retained assessment"
+    },
+    {
+      "case": "late_arrival",
+      "expected": "append accepted historical fact; newest current view selected by source observation time and scope, not ingestion order"
+    },
+    {
+      "case": "changed_policy",
+      "expected": "old score unchanged; new assessment carries new policy; incompatible trend series separated"
+    },
+    {
+      "case": "scanner_report_only",
+      "expected": "successful workflow with findings or ignored exit codes does not imply clean security"
+    },
+    {
+      "case": "scanner_error",
+      "expected": "failed/missing/stale required scan records incomplete coverage, never green"
+    },
+    {
+      "case": "amber_with_missing_scan",
+      "expected": "unresolved finding remains amber and incomplete coverage remains visible"
+    },
+    {
+      "case": "revoked_evidence",
+      "expected": "retain historical assessment and append invalidation; current status cannot remain green"
+    },
+    {
+      "case": "required_workflow_not_run",
+      "expected": "CI coverage unknown even when another workflow passes"
+    },
+    {
+      "case": "optional_roadmap",
+      "expected": "future optional feature does not create release-completeness defect"
+    },
+    {
+      "case": "authored_claim_only",
+      "expected": "D label cannot certify runtime behavior"
+    },
+    {
+      "case": "threshold_rounding",
+      "expected": "raw value 84.99 cannot pass green threshold even when display rounds to 85.0"
+    },
+    {
+      "case": "finding_exception_expired",
+      "expected": "exception no longer applies; finding retained and reevaluated"
+    },
+    {
+      "case": "empty_input",
+      "expected": "unknown, zero coverage, no current passing score"
+    },
+    {
+      "case": "future_source_time",
+      "expected": "invalid evidence excluded from current score; diagnostic retained"
+    },
+    {
+      "case": "cloud_failure",
+      "expected": "local durable pending record retained; bounded later retry; no duplicate effects"
+    },
+    {
+      "case": "budget_unverified",
+      "expected": "cloud writes remain disabled; no billing enablement, upgrade or auto-delete"
+    },
+    {
+      "case": "read_only_ui",
+      "expected": "reading score never approves execution, starts Codex, deploys or remediates"
+    },
+    {
+      "case": "data_safety",
+      "expected": "no raw secrets, transcripts, personal hiring assessments or local paths in public config/cloud summaries without specific approval"
+    }
+  ]
+}
