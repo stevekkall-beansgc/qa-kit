@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "policy_id": "legume-repository-scorecard",
+  "policy_version": "1.0.0-draft.1",
+  "status": "review-only",
+  "enabled": false,
+  "authority": {
+    "policy_owner": "qa-kit",
+    "decision_owner": "repository owner",
+    "collection_owner": "qa-kit",
+    "presentation_owner": "agency",
+    "periodic_clock_owner": "bean-sched",
+    "knowledge_owner": "BeanMind"
+  },
+  "portfolio": {
+    "canonical_path": "PORTFOLIO-READINESS.md",
+    "policy_version": "1.0.0",
+    "policy_commit": "d452ff6c38e25d15d0767fbf1b99ccaf06eccc91",
+    "publication_key": "publication",
+    "hiring_key": "hiring",
+    "scale": 100,
+    "showcase_display": "hiring / 10",
+    "audience_required": true,
+    "copy_rubric": false
+  },
+  "health": {
+    "scale": 100,
+    "formula": "sum(weight * rating / 4)",
+    "rating_range": [
+      0,
+      4
+    ],
+    "unknown_rating": null,
+    "categories": [
+      {
+        "id": "core_journeys_recovery",
+        "weight": 40
+      },
+      {
+        "id": "required_tests_ci",
+        "weight": 25
+      },
+      {
+        "id": "release_completeness",
+        "weight": 20
+      },
+      {
+        "id": "setup_runtime_operations",
+        "weight": 15
+      }
+    ],
+    "unknown_credit": 0,
+    "unknown_is_failure": false,
+    "coverage_formula": "sum(weights of categories with complete current required evidence)",
+    "status_precedence": [
+      "confirmed_blocker_red",
+      "missing_required_evidence_unknown",
+      "numeric_and_floor_rules"
+    ],
+    "bands": {
+      "green_min": 85,
+      "green_category_floor": 3,
+      "amber_min": 60,
+      "red_below": 60
+    },
+    "blockers": [
+      "broken_supported_core_journey",
+      "failed_required_check",
+      "incomplete_release_critical_requirement"
+    ],
+    "roadmap_items_are_failures": false,
+    "known_blockers_persist_until_verified_clearance": true
+  },
+  "security": {
+    "practices_tool": "OpenSSF Scorecard",
+    "native_scale": 10,
+    "custom_aggregate": false,
+    "tool_version_required": true,
+    "raw_check_results_required": true,
+    "evidence_producers": [
+      "OpenSSF Scorecard",
+      "OSV-Scanner",
+      "Gitleaks",
+      "zizmor",
+      "risk-specific boundary tests"
+    ],
+    "status_precedence": [
+      "confirmed_blocker_red",
+      "unresolved_findings_amber",
+      "missing_required_evidence_unknown",
+      "complete_current_no_unresolved_findings_green"
+    ],
+    "blockers": [
+      "confirmed_exposed_credential",
+      "serious_reachable_vulnerability",
+      "failed_critical_security_boundary"
+    ],
+    "scan_error_is_clean": false,
+    "report_only_job_success_is_clean": false,
+    "exceptions_change_raw_score": false,
+    "required_exception_fields": [
+      "owner",
+      "finding_id",
+      "scope",
+      "reason",
+      "expires_at",
+      "approval_reference"
+    ]
+  },
+  "evidence": {
+    "labels": [
+      "D",
+      "I",
+      "V",
+      "U"
+    ],
+    "scope_before_scoring": true,
+    "exact_commit_required": true,
+    "missing_or_skipped_required_check": "unknown",
+    "never_run": "unknown",
+    "future_timestamp": "invalid",
+    "collection_failure": "unknown",
+    "current_fleet_policy": "reporting-policy.json",
+    "proposed_security_max_age_hours": 24,
+    "security_freshness_activation": "requires_review",
+    "carry_forward_requires_reviewed_unchanged_scope": true,
+    "runtime_claim_requires_execution_evidence": true
+  },
+  "history": {
+    "append_only": true,
+    "automatic_deletion": false,
+    "correction": "append_with_supersedes_assessment_id",
+    "idempotency": "same_id_same_hash_noop_different_hash_reject",
+    "required_fields": [
+      "assessment_id",
+      "repo_id",
+      "evaluated_commit",
+      "scope_id",
+      "scope_version",
+      "policy_id",
+      "policy_version",
+      "policy_commit",
+      "source_observation_id",
+      "observed_at",
+      "ingested_at",
+      "producer",
+      "producer_version",
+      "evidence_refs",
+      "content_sha256",
+      "results"
+    ],
+    "assessment_id_inputs": [
+      "repo_id",
+      "evaluated_commit",
+      "scope_id",
+      "scope_version",
+      "policy_id",
+      "policy_version",
+      "policy_commit",
+      "producer",
+      "producer_version",
+      "source_observation_id"
+    ],
+    "identity_canonicalization": "RFC8785_JSON_SHA256",
+    "content_hash_input": "canonical_source_assessment_payload",
+    "content_hash_excludes": [
+      "content_sha256",
+      "ingested_at"
+    ],
+    "ingested_at_assignment": "first_accepted_create_only",
+    "source_observation_id_reused_on_retry": true,
+    "correction_requires_new_source_observation_id": true,
+    "distinguish_source_ingestion_time": true,
+    "comparison_keys": [
+      "repo_id",
+      "scope_id",
+      "scope_version",
+      "metric",
+      "policy_major_version",
+      "audience_if_hiring",
+      "tool_version_if_security"
+    ],
+    "separate_collection_attempts": true,
+    "raw_secrets_prohibited": true,
+    "raw_transcripts_prohibited": true
+  },
+  "storage": {
+    "selected_backend": "gcp-firestore",
+    "provisioned": false,
+    "enabled": false,
+    "project_id": null,
+    "database_id": null,
+    "local_outbox": "reuse_reviewed_existing_durability_pattern",
+    "cloud_contents": "sanitized_score_summaries_and_safe_evidence_references",
+    "public_config_personal_hiring_assessments": "forbidden",
+    "public_config_private_local_paths": "forbidden",
+    "cloud_summary_personal_hiring_assessments": "reject_without_separate_specific_data_disclosure_approval",
+    "cloud_summary_private_local_paths": "reject_without_separate_specific_data_disclosure_approval",
+    "existing_agency_database_second_writer": false,
+    "cloudflare_history_writes": false,
+    "automatic_ttl": false,
+    "recovery_mode": "bounded_application_export_and_offline_restore",
+    "managed_backup_restore_pitr_ttl_allowed_without_billing": false,
+    "hosted_restore_verified": false,
+    "activation_requires": [
+      "approved_project_and_database",
+      "verified_free_allowance_and_shared_usage",
+      "no_new_spend_control_review",
+      "least_privilege_access_review",
+      "explicit_data_disclosure_approval",
+      "approved_private_export_and_offline_restore_verification",
+      "export_reads_within_free_allowance",
+      "query_and_storage_budget",
+      "explicit_rollout_approval"
+    ]
+  },
+  "rollout": {
+    "pilot_repos": [
+      "qa-kit",
+      "gate-kit"
+    ],
+    "collection_enabled": false,
+    "scheduling_enabled": false,
+    "cloud_writes_enabled": false,
+    "gate_enforcement_enabled": false,
+    "prohibited_automatic_actions": [
+      "codex_start_resume_or_prompt_injection",
+      "spending_or_subscription_change",
+      "publication_or_deployment",
+      "remediation_or_merge"
+    ],
+    "existing_free_model_handling": "unchanged",
+    "historical_estimates": "never_import_as_verified_assessments"
+  }
+}
