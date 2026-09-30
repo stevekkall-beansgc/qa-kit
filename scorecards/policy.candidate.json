@@ -140,6 +140,7 @@
       "policy_id",
       "policy_version",
       "policy_commit",
+      "source_observation_id",
       "observed_at",
       "ingested_at",
       "producer",
@@ -148,6 +149,27 @@
       "content_sha256",
       "results"
     ],
+    "assessment_id_inputs": [
+      "repo_id",
+      "evaluated_commit",
+      "scope_id",
+      "scope_version",
+      "policy_id",
+      "policy_version",
+      "policy_commit",
+      "producer",
+      "producer_version",
+      "source_observation_id"
+    ],
+    "identity_canonicalization": "RFC8785_JSON_SHA256",
+    "content_hash_input": "canonical_source_assessment_payload",
+    "content_hash_excludes": [
+      "content_sha256",
+      "ingested_at"
+    ],
+    "ingested_at_assignment": "first_accepted_create_only",
+    "source_observation_id_reused_on_retry": true,
+    "correction_requires_new_source_observation_id": true,
     "distinguish_source_ingestion_time": true,
     "comparison_keys": [
       "repo_id",
@@ -170,16 +192,24 @@
     "database_id": null,
     "local_outbox": "reuse_reviewed_existing_durability_pattern",
     "cloud_contents": "sanitized_score_summaries_and_safe_evidence_references",
+    "public_config_personal_hiring_assessments": "forbidden",
+    "public_config_private_local_paths": "forbidden",
+    "cloud_summary_personal_hiring_assessments": "reject_without_separate_specific_data_disclosure_approval",
+    "cloud_summary_private_local_paths": "reject_without_separate_specific_data_disclosure_approval",
     "existing_agency_database_second_writer": false,
     "cloudflare_history_writes": false,
     "automatic_ttl": false,
+    "recovery_mode": "bounded_application_export_and_offline_restore",
+    "managed_backup_restore_pitr_ttl_allowed_without_billing": false,
+    "hosted_restore_verified": false,
     "activation_requires": [
       "approved_project_and_database",
       "verified_free_allowance_and_shared_usage",
       "no_new_spend_control_review",
       "least_privilege_access_review",
       "explicit_data_disclosure_approval",
-      "backup_and_restore_verification",
+      "approved_private_export_and_offline_restore_verification",
+      "export_reads_within_free_allowance",
       "query_and_storage_budget",
       "explicit_rollout_approval"
     ]

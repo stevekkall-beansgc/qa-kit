@@ -203,6 +203,10 @@
       "expected": "same ID and canonical content hash produce one retained assessment"
     },
     {
+      "case": "later_delivery_retry",
+      "expected": "same source observation ID and source payload keep assessment ID and content hash despite later delivery; first ingested_at remains unchanged"
+    },
+    {
       "case": "conflicting_replay",
       "expected": "same ID and different hash rejected without replacing retained assessment"
     },
@@ -263,6 +267,10 @@
       "expected": "local durable pending record retained; bounded later retry; no duplicate effects"
     },
     {
+      "case": "offline_history_recovery",
+      "expected": "complete bounded private export verifies record hashes and restores historical records and current projection offline without billed Firestore features"
+    },
+    {
       "case": "budget_unverified",
       "expected": "cloud writes remain disabled; no billing enablement, upgrade or auto-delete"
     },
@@ -272,7 +280,7 @@
     },
     {
       "case": "data_safety",
-      "expected": "no raw secrets, transcripts, personal hiring assessments or local paths in public config/cloud summaries without specific approval"
+      "expected": "no raw secrets or transcripts; no personal hiring assessments or private local filesystem paths in public config, and none in cloud summaries without separate specific data-disclosure approval"
     }
   ]
 }

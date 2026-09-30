@@ -1,8 +1,8 @@
 # Repository scorecard candidate
-Status: **review only; no runtime consumer or activation**  
+Status: **review only; no runtime consumer or activation**
 Candidate version: 1.0.0-draft.1
 
-This proposal adds reproducible Health and Security reporting alongside existing publication and hiring measures. It does not modify PORTFOLIO-READINESS.md, reporting-policy.json, manifest.json, workflows, gates, schedules, credentials, databases or deployments. Approval of this draft is separate from runtime adoption. Machine-readable proposal: [policy](scorecards/policy.candidate.json). Review cases: [fixtures](scorecards/acceptance-cases.json); these are specifications, not an executed repository test suite.
+This proposal adds reproducible Health and Security reporting alongside existing publication and hiring measures. It does not modify PORTFOLIO-READINESS.md, reporting-policy.json, manifest.json, workflows, gates, schedules, credentials, databases or deployments. Approval of this draft is separate from runtime adoption. Machine-readable proposal: [policy](scorecards/policy.candidate.json). Review cases: [fixtures](scorecards/acceptance-cases.json); these are specifications, not runtime evaluator tests. A repository contract test checks that the disabled proposal and the nine Health fixture expectations remain internally consistent.
 
 ## Existing authority
 - Publication P/100 and audience-specific hiring H/100 retain the canonical [portfolio rulebook](PORTFOLIO-READINESS.md), version 1.0.0 at qa-kit commit d452ff6c38e25d15d0767fbf1b99ccaf06eccc91. Do not duplicate or silently change its rubric, floors or blockers.
@@ -64,11 +64,11 @@ Proposed logical records:
 - assessment_events: corrections, invalidations, revocations and verified blocker-clearance events
 - current projections: rebuildable pointers; never the historical source of truth
 
-Use deterministic IDs, canonical serialization and atomic create-if-absent semantics. Same ID/hash is a no-op; same ID/different hash is rejected. Corrections append a superseding record. Out-of-order valid evidence is retained historically. Enforce a bounded summary size and reject raw secrets/transcripts. Record private evidence by safe IDs; access must be checked separately.
+The producer assigns a stable `source_observation_id` once and preserves it across retries. Derive `assessment_id` from the policy's listed identity fields using RFC 8785 canonical JSON and SHA-256. Compute `content_sha256` from the canonical source assessment payload, excluding only `content_sha256` itself and delivery-only `ingested_at`. Thus an identical retry keeps its ID/hash even when delivered later. Set `ingested_at` once on the first accepted create and never rewrite it. Atomic create-if-absent makes the same ID/hash a no-op and rejects the same ID/different hash. A correction uses a new `source_observation_id` and appends a record naming the superseded assessment. Out-of-order valid evidence is retained historically. Enforce a bounded summary size and reject raw secrets/transcripts. Record private evidence by safe IDs; access must be checked separately.
 
 Reuse reviewed local durability patterns for offline delivery; never open a second writer against agency.db. No existing sync contract is implicitly extended. Schema, authentication, projection routing and acceptance tests need their own implementation review.
 
-Before cloud activation verify the actual GCP project, region, free database eligibility, shared usage, account billing exposure, least privilege, explicit data classification/disclosure approval, backup/restore, indexed bounded queries and quota budgets. Budget alerts alone are not a hard spending cap. If no-new-spend operation cannot be established, remain disabled. Do not enable billing, create credentials or expand access as a workaround.
+Before cloud activation verify the actual GCP project, region, free database eligibility, shared usage, account billing exposure, least privilege, explicit data classification/disclosure approval, indexed bounded queries and quota budgets. Public configuration must not contain personal hiring assessments or private local filesystem paths. Cloud summaries reject those fields by default; any exception needs separate, specific data-disclosure approval, not the general rollout approval. Verify a complete, bounded application-level export of append-only records to an approved private local store, hashes of the exported records, and offline restoration with rebuilt current projections using synthetic or approved-safe evidence. Account for export reads within the free allowance. This is the proposed no-spend recovery gate; it does not claim hosted Firestore restore was tested. If hosted restore is required, or any export/restore step cannot be verified without spend, cloud writes remain disabled. Firestore managed backup, restore, PITR and TTL are outside free usage. Budget alerts alone are not a hard spending cap. Do not enable billing, create credentials or expand access as a workaround.
 
 No automatic TTL/deletion. Plan retention with measured bytes and backup needs; preserve existing minimum retention and owner-review requirements. At capacity stop cloud writes safely with bounded local pending evidence and a visible blocker; do not upgrade or delete automatically. A sustainable archival/retention plan remains a rollout decision, not a promise of unlimited free storage.
 
@@ -77,7 +77,7 @@ For comparisons require matching repo/scope and metric meaning. Separate incompa
 ## Pilot and acceptance
 Start with qa-kit and gate-kit using synthetic, private or approved-safe evidence. Display repo, commit, P/H/Health/Security, status, coverage, source time, expiry, blockers and evidence drilldown in the existing read-only Hub surface. Do not automatically create/remediate tasks.
 
-The JSON fixtures provide nine Health boundary cases and integration acceptance requirements. A later implementation must convert these to executable tests covering idempotency/conflicts, stale and missing evidence, report-only scanner findings, policy changes, out-of-order delivery, privacy, quota failure, current projection recovery and execution isolation. Validate UI repeat/refresh/error states and relevant repository aggregate checks. An empty or unknown baseline is preferable to invented scores.
+The JSON fixtures provide nine Health boundary cases and integration acceptance requirements. The repository contract test checks the proposed arithmetic, status order and replay/activation invariants; it does not execute a scorer, database adapter, scanner or UI. A later implementation must convert the integration requirements to executable tests covering idempotency/conflicts, stale and missing evidence, report-only scanner findings, policy changes, out-of-order delivery, privacy, quota failure, current projection recovery and execution isolation. Validate UI repeat/refresh/error states and relevant repository aggregate checks. An empty or unknown baseline is preferable to invented scores.
 
 The candidate contains no evaluator, database adapter, installed scanner, schedule or UI implementation. Do not call the system implemented after merging configuration alone.
 
@@ -92,4 +92,5 @@ Review this branch independently, inspect repository rules and canonical portfol
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
 - [zizmor](https://docs.zizmor.sh/)
 - [Firestore free quota documentation](https://docs.cloud.google.com/firestore/quotas)
+- [Firestore pricing and billed backup features](https://cloud.google.com/firestore/pricing)
 Research date: 2026-09-30. Repository source inspection does not verify runtime deployment or account quotas.
