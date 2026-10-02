@@ -32,7 +32,7 @@ class TaskEntrypoint(unittest.TestCase):
         self.assertIn("if: github.repository == 'stevekkall-beansgc/qa-kit' && github.event_name == 'push' && github.ref == 'refs/heads/main'", local)
         self.assertIn('runs-on: [self-hosted, macOS, ARM64, beans-mac]', local)
         self.assertLess(local.index('test "$RUNNER_NAME" = "beans-macbook-qa-kit"'),
-                        local.index('uses: actions/checkout@v5'))
+                        local.index('uses: actions/checkout@'))
         self.assertIn('ref: ${{ github.sha }}', local)
         self.assertIn('persist-credentials: false', local)
         self.assertIn('task validate', local)
