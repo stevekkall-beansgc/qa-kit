@@ -1,10 +1,16 @@
 # Portfolio readiness rulebook
 
-Policy version: **1.0.0**  
-Owner: **qa-kit maintainers; Stephen Kall is the decision owner**  
-Adopted: **2026-09-25**  
-Reference research observed: **2026-09-22**  
-Status: **Adopted for repository publication and hiring-portfolio reviews**
+Policy version: **1.1.0 provisional**
+
+Owner: **qa-kit maintainers; Stephen Kall is the decision owner**
+
+Base policy adopted: **2026-09-25**
+
+Provisional acceptance: **2026-10-02, for the current Legume Labs review**
+
+Reference research observed: **2026-09-22**
+
+Status: **Provisionally accepted compatible guidance in canonical source**
 
 Canonical source: `qa-kit/PORTFOLIO-READINESS.md`. Start from
 [STANDARDS.md](STANDARDS.md); maintain the complete policy only here.
@@ -135,6 +141,40 @@ commit permalinks, CI runs, versioned reports, and identifiable demo builds.
 
 No entire category is not applicable. Scale requirements to the project: a
 stateless CLI can demonstrate input/output boundaries and no external transmission.
+
+### Optional review methods
+
+A fresh cold read can diagnose entry-page clarity and review efficiency. Freeze
+an answer key for the evaluated entry version before giving an unfamiliar reviewer
+only the approved entry URL, target audience and prompt. A useful bounded prompt
+asks for the problem, central demonstration, strongest evidence and exact location,
+builder contribution, consequential decision or lesson where claimed, and remaining
+verification needs. Record actual navigation, timing, inspected scope and mismatches.
+An agent diagnostic is not human usability validation; a timebox or informal /10
+rating is not a scoring gate. Reconcile findings against artifacts before using them
+as evidence for the existing dimensions.
+
+When learning, iteration or recurrence prevention is claimed, or the corresponding
+higher rating is sought, record a consequential decision, defect, negative or
+inconclusive result, or correction. Identify discovery evidence, consequences,
+version-linked response, verification and any demonstrated prevention. A prior belief
+may be unknown. None evidenced is a valid result; do not manufacture a lesson or
+present a synthetic rehearsal as a historical incident.
+
+An independent risk-focused technical review is a useful optional method for a
+flagship candidate. Challenge a central consequential claim at an exact commit and,
+where runnable and safe, execute a relevant check. Retain inspected scope, findings
+and owner dispositions. Model findings require artifact reconciliation, not automatic
+acceptance. Existing blockers govern verified critical findings; this method creates
+no additional flagship prerequisite or veto.
+
+Minimize data during evidence collection. Do not retain unnecessary live secrets,
+credentials or personal/private data even privately. Prefer sanitized excerpts,
+hashes or safe evidence IDs. Essential raw sensitive evidence requires a specifically
+approved restricted store with access and retention controls, never the public policy.
+
+These methods add compatible guidance only. Weights, anchors, thresholds, floors,
+blockers, unknown-credit rules and decision meanings remain unchanged from v1.0.0.
 
 ## 4. Publication readiness score: P / 100
 
@@ -283,6 +323,14 @@ Suggested reading targets are 30 seconds for relevance, five minutes for the
 central result, and a deeper path to implementation/validation. These are
 portfolio design targets, not universal recruiter-behavior claims.
 
+Lead with practical capability and the strongest relevant proof. Keep limitations
+necessary to prevent a materially wrong inference beside the affected claim,
+including payment mode, data handling, estimate basis and deployment scope.
+Supporting provenance may move into the evidence record when an accurate status
+and evidence link remain readily accessible. Verify that a rewrite does not strengthen
+the underlying claim. Word bans, negation quotas, fixed word counts, screenshots and
+viewport size are not policy gates.
+
 ## 9. Standard audit template
 
 Copy this template into an assessment, not the policy itself. Keep evidence and
@@ -316,7 +364,16 @@ H = __/100 for [audience]. All floors satisfied: yes/no.
 
 Verification: executed/inspected checks, commit, environment, results,
 skips, inaccessible evidence, retained report identifiers.
-Claim check: claim → evidence → supported / qualified / unsupported.
+Claim check: each material status, maturity/deployment, quantitative/comparative
+claim and featured proof → version-matched evidence URL or safe ID →
+supported / qualified / unsupported / unknown. Record stable location/short quote,
+evaluated commit/release/demo, D/I/V/U, reviewer/date and scope/qualification.
+An unknown claim must not be presented as established; a link must substantiate it.
+Runtime/performance claims retain their existing verified-runtime evidence standard.
+
+Optional diagnostics: fresh cold read, consequential learning/correction evidence,
+independent risk review; record inspected scope, findings, limits and reconciliation.
+Absence of an optional diagnostic is not an additional blocker or category floor.
 
 Decision:
 Publication: go / hold / no-go / archive only.
@@ -349,4 +406,5 @@ no repository; each needs a scoped assessment.
 
 | Version | Date | Change |
 |---|---|---|
+| 1.1.0 provisional | 2026-10-02 | Decision owner provisionally accepted guarded cold-read, capability-first presentation, conditional learning and material-claim guidance for the current review; optional risk review, no scoring or decision-rule changes. Canonical source integration; original research date unchanged. |
 | 1.0.0 | 2026-09-25 | Adopted the 2026-09-22 research rulebook as the canonical qa-kit standard, with policy ownership/versioning, separate action authorization, immutable audit references, private-evidence handling, and reusable template. |
