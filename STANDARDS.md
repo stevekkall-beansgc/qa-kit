@@ -5,7 +5,7 @@ Full requirements live at the link — never duplicate them here. If a
 standard has no home yet, it gets a home before it gets a kernel line.
 
 Owner repo: `qa-kit` · Binding on every session, human or agent.
-Amended: 2026-09-28
+Amended: 2026-10-04
 
 ---
 
@@ -22,7 +22,9 @@ Amended: 2026-09-28
 
 **Review contract** — done = tests exist and run_all green; fixes ship failing-first; flows ship with owned e2e. → [README §contract](README.md)
 
-**Portfolio readiness v1** — assess publication readiness and audience-specific hiring usefulness with the versioned evidence rubric before showcasing a repository. → [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
+**Portfolio readiness** — assess publication readiness and audience-specific hiring usefulness with the exact versioned evidence rubric before showcasing a repository. → [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
+
+**README human readability** — review every repo's human entry for purpose, useful starting path, proof, plain language and accurate limits before accepting material README changes or promotion. → [README standard and checklist](README-STANDARD.md)
 
 **Docs standard v1** — every repo carries README (human) + AGENTS.md (agent, Test commands = manifest entrypoint exactly). → [bin/check_docs.py](bin/check_docs.py)
 

@@ -233,6 +233,11 @@ Binding for every Legume Labs session, human or agent, effective 2026-08-24:
    without a manifest row blocks the merge.
 6. **Baseline rule**: a `planned` repo must graduate to `active` within its next
    touch. "Established or will be established" is never sufficient.
+7. **Human readability**: material README changes and publication reviews use
+   the [universal README checklist](README-STANDARD.md), with a recorded 0–4
+   rating and before/after result. Passing structural docs checks alone is
+   insufficient; reviewer findings about purpose, navigation and claim clarity
+   must be resolved before the entry is called ready.
 
 ### Add a fleet repo
 

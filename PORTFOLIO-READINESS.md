@@ -1,6 +1,6 @@
 # Portfolio readiness rulebook
 
-Policy version: **1.1.0 provisional**
+Policy version: **2.0.0 candidate**
 
 Owner: **qa-kit maintainers; Stephen Kall is the decision owner**
 
@@ -10,10 +10,18 @@ Provisional acceptance: **2026-10-02, for the current Legume Labs review**
 
 Reference research observed: **2026-09-22**
 
-Status: **Provisionally accepted compatible guidance in canonical source**
+Status: **Human readability policy change prepared October 4, 2026; source integration and release pending**
 
 Canonical source: `qa-kit/PORTFOLIO-READINESS.md`. Start from
 [STANDARDS.md](STANDARDS.md); maintain the complete policy only here.
+
+This v2 candidate makes the [universal README review](README-STANDARD.md)
+explicit, including a human-readability rating and publication floor. It keeps
+the existing weights and numerical bands, but changes eligibility; therefore
+it is a major policy revision, not compatible v1 guidance. Existing v1
+assessments retain their original scores, dates and decisions. Reassess against
+the exact v2 source before reporting a v2 score or decision. Preparing this
+policy does not retroactively change the fleet's publication dispositions.
 
 A repository should be publicly showcased when a reviewer can verify what it
 does, understand the builder's contribution, reproduce its central behavior,
@@ -176,6 +184,11 @@ approved restricted store with access and retention controls, never the public p
 These methods add compatible guidance only. Weights, anchors, thresholds, floors,
 blockers, unknown-credit rules and decision meanings remain unchanged from v1.0.0.
 
+That statement describes the optional methods carried forward from v1.1.
+The required README review and new floors below are the explicit v2 exception.
+An unfamiliar cold read remains optional for level 3; the recorded editorial
+checklist is required. Its absence is unknown readiness, not a passing review.
+
 ## 4. Publication readiness score: P / 100
 
 Use integer ratings; award the highest level fully supported:
@@ -199,7 +212,7 @@ display one decimal place without rounding upward into a passing band.
 | Tests and CI | 18 | Inspectable passing checks on evaluated commit; substantive assertions for core journey, meaningful failure, relevant boundaries; critical checks cannot silently skip or ignore failure. | Relevant property, concurrency, compatibility, fault-injection, or evaluation tests with actionable failures. |
 | Security, privacy, and provenance | 18 | Data/privilege boundaries; dependencies/findings reviewed; secret scan of intended publication history/artifacts; synthetic examples; reuse terms/attribution; applicable authorization/isolation checks; vulnerability contact. | Verified abuse resistance, retention/deletion, and supply-chain/recovery controls proportionate to exposure. |
 | Reproducibility | 12 | Successful clean-environment run using documented prerequisites, dependency resolution, configuration, sample data, commands, and expected results; hardware, paid services, and resource costs disclosed. | Independent replay or multiple clean environments, with troubleshooting/reset instructions. |
-| Documentation | 8 | README explains user, problem, supported behavior, setup, example output, limitations, architecture location, and verification commands; links/examples match evaluated version. | Newcomer completes workflow and diagnoses common failures without author help. |
+| Documentation | 8 | README passes the universal human-readability checklist at rating ≥3; explains user, problem, supported behavior, setup, example output, limitations, architecture location, and verification commands; deeper detail is navigable and links/examples match evaluated version. | Newcomer completes workflow and diagnoses common failures without author help; recorded unfamiliar-reader evidence supports readability level 4. |
 | Releases and change safety | 6 | Identifiable tested version or named snapshot; user-relevant changes, compatibility expectations, migration/recovery instructions for persistent-state changes. | Repeatable artifact creation, provenance, and verified upgrade/recovery where relevant. |
 | Maintenance | 4 | Accurate active/paused/archived status, known issues, realistic support expectations; dependency review and reproducibility check at audit date. | Substantive diagnosis, correction, and recurrence prevention example. |
 | Demo and product story | 5 | Complete representative journey, believable synthetic inputs, observable output; working demo or versioned recording/output plus runnable instructions; mocks/dependencies identified. | Reviewer explores a consequential edge case and understands practical benefit without narration. |
@@ -208,6 +221,20 @@ display one decimal place without rounding upward into a passing band.
 
 A project meeting level 3 throughout earns 75/100, intentionally sufficient
 for publication. Solo builders need not be exceptional in every category.
+
+### Human readability in the scorecard
+
+Record **human readability (0–4)** using [README-STANDARD.md](README-STANDARD.md)
+alongside P Documentation and H Review efficiency. It is visible evidence, with
+no additional weighted category and no extra points. Documentation and
+review-efficiency ratings cannot exceed the human-readability rating; each
+must also meet its own existing evidence requirements. Use the lowest applicable
+rating, not an average that hides a failed checklist item. Technical quality,
+claim traceability or many caveats cannot compensate for an unusable human entry.
+
+Apply scope-appropriate examples: archives offer an honest inspection path;
+libraries show API use; private tools explain authorized access. A public demo,
+recording, word quota or recruited human tester is not universally required.
 
 ## 5. Critical blockers and publication decisions
 
@@ -227,7 +254,7 @@ blocker means hold; it does not establish a proven violation.
 |---|---|
 | P < 55 | No-go as a usable portfolio project |
 | 55 ≤ P < 70 | Hold; close evidence/implementation gaps |
-| 70 ≤ P < 85 | Go only with no blockers, all ratings ≥2, and security/privacy/provenance, reproducibility, and honesty each ≥3 |
+| 70 ≤ P < 85 | Go only with no blockers, all ratings ≥2, and security/privacy/provenance, reproducibility, honesty, documentation, and human readability each ≥3 |
 | P ≥ 85 | Strong publication evidence, subject to the same blockers/floors; not blanket production certification |
 
 An explicitly labeled historical archive can undergo a narrower review when
@@ -268,7 +295,8 @@ difficult correctness/performance tradeoff, not stronger adjectives.
 | 75 ≤ H < 85 | Feature-worthy if publication passes |
 | H ≥ 85 | Flagship candidate if publication passes |
 
-Featuring also requires relevance, ownership, judgment, and validation each ≥3.
+Under v2, relevance, ownership, judgment, validation and review efficiency each ≥3
+are required for feature or flagship selection; human readability must also be ≥3.
 Communication cannot compensate for missing substance. A high-H project with
 a publication blocker may support a separately reviewed sanitized case study;
 its score never authorizes repository exposure.
@@ -345,6 +373,13 @@ Maturity / supported execution mode:
 Critical journey / highest-risk behavior:
 Builder contribution / inherited code / material AI assistance:
 
+README review (required; README-STANDARD.md):
+Reader and purpose / entry artifact identity / reviewer and date:
+Checklist results and locations / before-and-after comparison:
+Human readability (0–4): __; evidence and one-sentence rationale:
+README review result: ready / revise / unknown
+Required correction and recheck evidence:
+
 Evidence index:
 E1 — safe permalink or evidence ID; D/I/V/U; supported claim; version/environment.
 Repeat for each material artifact.
@@ -356,11 +391,12 @@ Publication ratings (0–4), with evidence IDs and one-sentence rationale each:
 Architecture __; code __; tests/CI __; security/privacy/provenance __;
 reproducibility __; documentation __; releases __; maintenance __;
 demo __; honesty __.
-P = __/100. All floors satisfied: yes/no. Blockers cleared: yes/no.
+P = __/100. All floors satisfied, including documentation/readability ≥3: yes/no.
+Blockers cleared: yes/no.
 
 Hiring ratings (0–4), with evidence IDs and one-sentence rationale each:
 Relevance __; ownership __; judgment __; validation __; efficiency __.
-H = __/100 for [audience]. All floors satisfied: yes/no.
+H = __/100 for [audience]. All feature floors, including efficiency/readability ≥3: yes/no.
 
 Verification: executed/inspected checks, commit, environment, results,
 skips, inaccessible evidence, retained report identifiers.
@@ -373,7 +409,8 @@ Runtime/performance claims retain their existing verified-runtime evidence stand
 
 Optional diagnostics: fresh cold read, consequential learning/correction evidence,
 independent risk review; record inspected scope, findings, limits and reconciliation.
-Absence of an optional diagnostic is not an additional blocker or category floor.
+Absence of an optional diagnostic is not an additional blocker or category floor;
+the required README checklist above is not optional.
 
 Decision:
 Publication: go / hold / no-go / archive only.
@@ -406,5 +443,6 @@ no repository; each needs a scoped assessment.
 
 | Version | Date | Change |
 |---|---|---|
+| 2.0.0 candidate | 2026-10-04 | Add universal human README checklist and explicit 0–4 readability evidence; cap Documentation/Review efficiency by that rating, require documentation/readability ≥3 for publication and efficiency/readability ≥3 for featuring. Weights/bands unchanged; previous scores not migrated. Source integration/release pending. |
 | 1.1.0 provisional | 2026-10-02 | Decision owner provisionally accepted guarded cold-read, capability-first presentation, conditional learning and material-claim guidance for the current review; optional risk review, no scoring or decision-rule changes. Canonical source integration; original research date unchanged. |
 | 1.0.0 | 2026-09-25 | Adopted the 2026-09-22 research rulebook as the canonical qa-kit standard, with policy ownership/versioning, separate action authorization, immutable audit references, private-evidence handling, and reusable template. |
