@@ -29,7 +29,7 @@ class ReadmeStandardContract(unittest.TestCase):
 
     def test_scorecard_uses_existing_weights_without_extra_points(self):
         text = (ROOT / "PORTFOLIO-READINESS.md").read_text()
-        self.contains("Policy version: **2.0.0**", text)
+        self.contains("Policy version: **2.0.1**", text)
         self.contains("| Documentation | 8 |", text)
         self.contains("| Review efficiency | 10 |", text)
         self.contains("no additional weighted category", text)
@@ -48,6 +48,30 @@ class ReadmeStandardContract(unittest.TestCase):
         self.contains("Existing v1 assessments retain their original scores", policy)
         self.contains("does not automatically judge human readability", standard)
         self.contains("An agent read is a diagnostic, not human usability research", standard)
+
+    def test_visual_explanations_and_preservation_are_reviewed(self):
+        standard = (ROOT / "README-STANDARD.md").read_text()
+        policy = (ROOT / "PORTFOLIO-READINESS.md").read_text()
+        self.contains("## Visual explanations", standard)
+        self.contains("Do not remove or bury useful existing visuals merely to shorten", standard)
+        self.contains("Visual preservation:", standard)
+        self.contains("Visuals inspected / retained / replaced / omitted, with reason:", policy)
+        self.contains("no additional weighted category", policy)
+
+    def test_visual_usefulness_and_accepted_reference_are_required(self):
+        standard = (ROOT / "README-STANDARD.md").read_text()
+        policy = (ROOT / "PORTFOLIO-READINESS.md").read_text()
+        for requirement in (
+            "Informative diagrams take priority over decorative illustration.",
+            "What can the reader understand or do because of this visual?",
+            "Preserve explanatory coverage, not just asset presence.",
+            "## Accepted quality reference",
+            "Legume Labs README restoration accepted by Stephen on October 4, 2026",
+            "Visual usefulness: reader question; roles/relationships/flow explained; comparison reference and gaps.",
+        ):
+            self.contains(requirement, standard)
+        self.contains("Visual usefulness / reader question answered / explanatory coverage versus accepted reference:", policy)
+        self.contains("revise, not a passing visual review", policy)
 
 
 if __name__ == "__main__":

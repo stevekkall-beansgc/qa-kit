@@ -24,7 +24,7 @@ Amended: 2026-10-04
 
 **Portfolio readiness** — assess publication readiness and audience-specific hiring usefulness with the exact versioned evidence rubric before showcasing a repository. → [Portfolio readiness rulebook](PORTFOLIO-READINESS.md)
 
-**README human readability** — review every repo's human entry for purpose, useful starting path, proof, plain language and accurate limits before accepting material README changes or promotion. → [README standard and checklist](README-STANDARD.md)
+**README human readability** — review every repo's human entry for purpose, useful starting path, proof, informative visuals that preserve explanatory coverage, plain language and accurate limits against its accepted reference. → [README standard and checklist](README-STANDARD.md)
 
 **Docs standard v1** — every repo carries README (human) + AGENTS.md (agent, Test commands = manifest entrypoint exactly). → [bin/check_docs.py](bin/check_docs.py)
 

@@ -1,6 +1,6 @@
 # Portfolio readiness rulebook
 
-Policy version: **2.0.0**
+Policy version: **2.0.1**
 
 Owner: **qa-kit maintainers; Stephen Kall is the decision owner**
 
@@ -12,7 +12,7 @@ Policy v2 adopted: **2026-10-04, by Stephen Kall**
 
 Reference research observed: **2026-09-22**
 
-Status: **Adopted policy; source publication follows the existing release gates**
+Status: **Adopted visual-review clarification of 2.0.0; source publication follows the existing release gates**
 
 Canonical source: `qa-kit/PORTFOLIO-READINESS.md`. Start from
 [STANDARDS.md](STANDARDS.md); maintain the complete policy only here.
@@ -234,6 +234,17 @@ must also meet its own existing evidence requirements. Use the lowest applicable
 rating, not an average that hides a failed checklist item. Technical quality,
 claim traceability or many caveats cannot compensate for an unusable human entry.
 
+The same review records whether useful illustrations and flow diagrams are
+visible, legible, accurate and preserved through rewrites. A badge or decorative
+image earns no credit by itself. Record the reader question each visual answers
+and compare explanatory coverage with the strongest accepted README reference.
+A replacement that loses important component roles, relationships or flow is
+revise, not a passing visual review, even if its files load or it looks polished.
+The owner-accepted Legume Labs restoration is the portfolio quality reference
+described in the README standard, not a universal layout or a usability study.
+This clarifies the existing evidence and regression criteria; weights,
+numerical floors and decisions remain unchanged.
+
 Apply scope-appropriate examples: archives offer an honest inspection path;
 libraries show API use; private tools explain authorized access. A public demo,
 recording, word quota or recruited human tester is not universally required.
@@ -378,6 +389,8 @@ Builder contribution / inherited code / material AI assistance:
 README review (required; README-STANDARD.md):
 Reader and purpose / entry artifact identity / reviewer and date:
 Checklist results and locations / before-and-after comparison:
+Visuals inspected / retained / replaced / omitted, with reason:
+Visual usefulness / reader question answered / explanatory coverage versus accepted reference:
 Human readability (0–4): __; evidence and one-sentence rationale:
 README review result: ready / revise / unknown
 Required correction and recheck evidence:
@@ -445,6 +458,7 @@ no repository; each needs a scoped assessment.
 
 | Version | Date | Change |
 |---|---|---|
+| 2.0.1 | 2026-10-04 | Decision owner adopted the clarification of informative visual usefulness, explanatory coverage and preservation using the accepted Legume Labs reference in existing README evidence/regression reviews. No new weighted category, numerical floor, scoring meaning or decision rule; previous assessments unchanged. Source publication follows the existing release gates. |
 | 2.0.0 | 2026-10-04 | Decision owner adopted the universal human README checklist and explicit 0–4 readability evidence; cap Documentation/Review efficiency by that rating, require documentation/readability ≥3 for publication and efficiency/readability ≥3 for featuring. Weights/bands unchanged; previous scores not migrated. Source publication follows the existing release gates. |
 | 1.1.0 provisional | 2026-10-02 | Decision owner provisionally accepted guarded cold-read, capability-first presentation, conditional learning and material-claim guidance for the current review; optional risk review, no scoring or decision-rule changes. Canonical source integration; original research date unchanged. |
 | 1.0.0 | 2026-09-25 | Adopted the 2026-09-22 research rulebook as the canonical qa-kit standard, with policy ownership/versioning, separate action authorization, immutable audit references, private-evidence handling, and reusable template. |

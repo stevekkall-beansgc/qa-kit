@@ -1,0 +1,7 @@
+flowchart TD
+  accTitle: How a run becomes a verdict
+  accDescr: A trusted manifest selects repository-owned commands; QA Kit checks documentation, runs the selected commands and records passing, failing or unusable configuration outcomes.
+  A["Trusted manifest"] --> B["Select repository and checks"]
+  B --> C["Documentation and owned commands"]
+  C --> D["JSON report and exit status"]
+  D --> E["Pass, fail or unusable configuration"]
