@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="1040" viewBox="0 0 980 1040" role="img" aria-labelledby="title desc">
+<title id="title">QA Kit: Test ownership stays with the code.</title>
+<desc id="desc">A trusted manifest and run selection coordinate checks located in the owning repository. Documentation is inspected locally; setup precedes selected unit and end-to-end commands. Reports retain selection, source identity, durations and outcomes; planned gaps do not count as passing checks.</desc>
+<!-- Editable source diagram. Shapes are explanatory, not a deployment or performance receipt. -->
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M1 1 L7 4 L1 7" fill="none" stroke="context-stroke" stroke-width="1.8"/></marker></defs>
+<rect width="980" height="100%" fill="#f8fafc"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="38" y="44" font-size="19" font-weight="700" fill="#0e756a" text-anchor="start">QA KIT / HOW IT WORKS</text>
+<text x="38" y="100" font-size="39" font-weight="700" fill="#152d45" text-anchor="start">Test ownership stays with the code.</text>
+<text x="38" y="138" font-size="22" font-weight="400" fill="#4e6276" text-anchor="start">The manifest coordinates a run; it does not move every test into a central</text>
+<text x="38" y="168.8" font-size="22" font-weight="400" fill="#4e6276" text-anchor="start">repository.</text>
+<rect x="38" y="195" width="438" height="172" rx="16" fill="#edf4fd" stroke="#d6e2ec" stroke-width="2"/>
+<rect x="38" y="211" width="5" height="140" rx="2" fill="#245fa5"/>
+<text x="60" y="225" font-size="18" font-weight="700" fill="#245fa5" text-anchor="start">CONTROL INPUT</text>
+<text x="60" y="255" font-size="24" font-weight="700" fill="#245fa5" text-anchor="start">Trusted manifest</text>
+<text x="60" y="295.6" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Repository path + command argv</text>
+<text x="60" y="331" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Setup / unit / optional E2E</text>
+<rect x="504" y="195" width="438" height="172" rx="16" fill="#eaf6f2" stroke="#d6e2ec" stroke-width="2"/>
+<rect x="504" y="211" width="5" height="140" rx="2" fill="#0e756a"/>
+<text x="526" y="225" font-size="18" font-weight="700" fill="#0e756a" text-anchor="start">COVERAGE IS EXPLICIT</text>
+<text x="526" y="255" font-size="24" font-weight="700" fill="#0e756a" text-anchor="start">Run selection</text>
+<text x="526" y="295.6" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">One repo or the selected fleet</text>
+<text x="526" y="331" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Default unit / --e2e / --all</text>
+<polyline points="258,367 258,401 490,401 490,434" fill="none" stroke="#245fa5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="723,367 723,401 490,401" fill="none" stroke="#0e756a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="38" y="434" width="904" height="330" rx="16" fill="white" stroke="#b7cbdc" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="60" y="473" font-size="20" font-weight="700" fill="#245fa5" text-anchor="start">INSIDE THE OWNING REPOSITORY</text>
+<rect x="60" y="501" width="276" height="208" rx="16" fill="#f0f3f7" stroke="#d6e2ec" stroke-width="2"/>
+<rect x="60" y="517" width="5" height="176" rx="2" fill="#4e6276"/>
+<text x="82" y="531" font-size="24" font-weight="700" fill="#4e6276" text-anchor="start">Docs</text>
+<text x="82" y="571.6" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">README + AGENTS</text>
+<text x="82" y="607" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Sections and</text>
+<text x="82" y="636.4" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">declared commands</text>
+<rect x="354" y="501" width="276" height="208" rx="16" fill="#edf4fd" stroke="#d6e2ec" stroke-width="2"/>
+<rect x="354" y="517" width="5" height="176" rx="2" fill="#245fa5"/>
+<text x="376" y="531" font-size="24" font-weight="700" fill="#245fa5" text-anchor="start">Setup + unit</text>
+<text x="376" y="571.6" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Setup runs first</text>
+<text x="376" y="607" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Failed setup blocks</text>
+<text x="376" y="636.4" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">dependent tests</text>
+<rect x="648" y="501" width="272" height="208" rx="16" fill="#eaf6f2" stroke="#d6e2ec" stroke-width="2"/>
+<rect x="648" y="517" width="5" height="176" rx="2" fill="#0e756a"/>
+<text x="670" y="531" font-size="24" font-weight="700" fill="#0e756a" text-anchor="start">Owned E2E</text>
+<text x="670" y="571.6" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">Only when selected</text>
+<text x="670" y="601" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">and registered</text>
+<text x="670" y="636.4" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">No implicit</text>
+<text x="670" y="665.8" font-size="21" font-weight="400" fill="#152d45" text-anchor="start">live-health proof</text>
+<text x="60" y="744" font-size="21" font-weight="400" fill="#4e6276" text-anchor="start">Runner subprocesses capture outcome, elapsed time and a bounded output tail.</text>
+<polyline points="490,764 490,800" fill="none" stroke="#245fa5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="38" y="801" width="904" height="129" rx="16" fill="#152d45" stroke="#152d45" stroke-width="2"/>
+<text x="60" y="840" font-size="26" font-weight="700" fill="white" text-anchor="start">One JSON report, with inspectable coverage</text>
+<text x="60" y="878" font-size="22" font-weight="400" fill="#d8e5f2" text-anchor="start">Source / manifest identity • selected checks • result per check</text>
+<text x="60" y="911" font-size="22" font-weight="400" fill="#d8e5f2" text-anchor="start">Passing run   /   failed checks   /   unusable configuration</text>
+<polyline points="38,934 942,934" fill="none" stroke="#d5e0ea" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="38" y="964" font-size="20" font-weight="400" fill="#4e6276" text-anchor="start">Manifest commands execute with local permissions: only run trusted controls.</text>
+<text x="38" y="992" font-size="20" font-weight="400" fill="#4e6276" text-anchor="start">Planned gaps and unselected checks are not evidence of passing coverage.</text>
+</g>
+</svg>

@@ -4,12 +4,15 @@ Run the checks a repository owns and get a clear JSON verdict. QA Kit reads a
 manifest of repository paths and commands, runs the selected checks, and
 records what passed or failed. Tests stay with the code they test.
 
+Start here: [Try the public quickstart](#five-minute-public-showcase).
+
 ## How a run becomes a verdict
 
-![A trusted manifest selects repository-owned commands; QA Kit checks documentation, runs the selected commands and records passing, failing or unusable configuration outcomes.](assets/readme-flow.svg)
+![A trusted manifest and run selection coordinate checks located in the owning repository. Documentation is inspected locally; setup precedes selected unit and end-to-end commands. Reports retain selection, source identity, durations and outcomes; planned gaps do not count as passing checks.](assets/readme-methods.svg)
 
-The manifest chooses the commands; QA Kit records their outcomes. A passing result covers only the checks selected for that run.
-[Full-size diagram](assets/readme-flow.svg) · [Editable source](assets/readme-flow.mmd).
+The manifest owns selection; the product repository owns the tests. Setup failure blocks dependent checks, and the report records exactly what was selected—not implied fleet coverage. [Runner implementation](bin/run_all.py) · [Example report](examples/synthetic_quickstart_report.json).
+
+[Full-size diagram and editable SVG source](assets/readme-methods.svg).
 
 ## Five-minute public showcase
 
