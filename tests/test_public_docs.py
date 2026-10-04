@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -81,6 +83,35 @@ class PublicDocumentationTests(unittest.TestCase):
                 Path(directory), "pass", docs_ok=True, unit_ok=True, expect_fail=False)
         self.assertEqual(code, 0)
         self.assertEqual(synthetic_quickstart.public_sample_report(report), sample)
+
+    def test_full_quickstart_cli_verifies_all_scenarios_and_sample(self):
+        child = subprocess.run(
+            ["python3", "-c", "import json, sys; print(json.dumps({"
+             "'version': sys.version.split()[0], "
+             "'minor': list(sys.version_info[:2])}))"],
+            cwd=ROOT, capture_output=True, text=True, check=True, timeout=10,
+        )
+        runtime = json.loads(child.stdout)
+        self.assertEqual(runtime["minor"], list(sys.version_info[:2]),
+                         "quickstart's python3 child must match the test driver")
+        result = subprocess.run(
+            [sys.executable, "examples/synthetic_quickstart.py", "--verify-sample",
+             "examples/synthetic_quickstart_report.json"],
+            cwd=ROOT, capture_output=True, text=True, timeout=180,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(result.stdout.splitlines(), [
+            "PASS  docs+unit run: exit 0, all 2 results ok, JSON report written",
+            "PASS  failing docs run: exit 1, docs FAIL recorded, JSON report written",
+            "PASS  failing unit run: exit 1, unit FAIL recorded, JSON report written",
+            "PASS  sample report verified: examples/synthetic_quickstart_report.json",
+            "synthetic quickstart OK (3/3 scenarios, all output in disposable dirs)",
+        ])
+        # Only successful synthetic output/runtime versions are emitted for CI proof.
+        print(f"Quickstart CLI runtime: driver {sys.version.split()[0]}, "
+              f"child {runtime['version']}, platform {sys.platform}")
+        print(result.stdout, end="")
 
 
 if __name__ == "__main__":
