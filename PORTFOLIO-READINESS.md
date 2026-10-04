@@ -1,21 +1,23 @@
 # Portfolio readiness rulebook
 
-Policy version: **2.0.0 candidate**
+Policy version: **2.0.0**
 
 Owner: **qa-kit maintainers; Stephen Kall is the decision owner**
 
 Base policy adopted: **2026-09-25**
 
-Provisional acceptance: **2026-10-02, for the current Legume Labs review**
+Historical v1.1 provisional acceptance: **2026-10-02, for the Legume Labs review**
+
+Policy v2 adopted: **2026-10-04, by Stephen Kall**
 
 Reference research observed: **2026-09-22**
 
-Status: **Human readability policy change prepared October 4, 2026; source integration and release pending**
+Status: **Adopted policy; source publication follows the existing release gates**
 
 Canonical source: `qa-kit/PORTFOLIO-READINESS.md`. Start from
 [STANDARDS.md](STANDARDS.md); maintain the complete policy only here.
 
-This v2 candidate makes the [universal README review](README-STANDARD.md)
+This v2 policy makes the [universal README review](README-STANDARD.md)
 explicit, including a human-readability rating and publication floor. It keeps
 the existing weights and numerical bands, but changes eligibility; therefore
 it is a major policy revision, not compatible v1 guidance. Existing v1
@@ -443,6 +445,6 @@ no repository; each needs a scoped assessment.
 
 | Version | Date | Change |
 |---|---|---|
-| 2.0.0 candidate | 2026-10-04 | Add universal human README checklist and explicit 0–4 readability evidence; cap Documentation/Review efficiency by that rating, require documentation/readability ≥3 for publication and efficiency/readability ≥3 for featuring. Weights/bands unchanged; previous scores not migrated. Source integration/release pending. |
+| 2.0.0 | 2026-10-04 | Decision owner adopted the universal human README checklist and explicit 0–4 readability evidence; cap Documentation/Review efficiency by that rating, require documentation/readability ≥3 for publication and efficiency/readability ≥3 for featuring. Weights/bands unchanged; previous scores not migrated. Source publication follows the existing release gates. |
 | 1.1.0 provisional | 2026-10-02 | Decision owner provisionally accepted guarded cold-read, capability-first presentation, conditional learning and material-claim guidance for the current review; optional risk review, no scoring or decision-rule changes. Canonical source integration; original research date unchanged. |
 | 1.0.0 | 2026-09-25 | Adopted the 2026-09-22 research rulebook as the canonical qa-kit standard, with policy ownership/versioning, separate action authorization, immutable audit references, private-evidence handling, and reusable template. |

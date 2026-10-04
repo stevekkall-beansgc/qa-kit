@@ -29,7 +29,7 @@ class ReadmeStandardContract(unittest.TestCase):
 
     def test_scorecard_uses_existing_weights_without_extra_points(self):
         text = (ROOT / "PORTFOLIO-READINESS.md").read_text()
-        self.contains("Policy version: **2.0.0 candidate**", text)
+        self.contains("Policy version: **2.0.0**", text)
         self.contains("| Documentation | 8 |", text)
         self.contains("| Review efficiency | 10 |", text)
         self.contains("no additional weighted category", text)

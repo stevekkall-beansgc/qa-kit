@@ -44,8 +44,10 @@ this repo registers entrypoints, runs them uniformly, records verdicts.
    weekly bean-sched reconciler job catches misses and fails loudly.
 5. Reviewer checklist: diff without tests → block; new flow without a
    manifest row → block; planned repos graduate on next touch.
-6. Human README changes use [README-STANDARD.md](README-STANDARD.md): record
-   the checklist, readability rating and before/after disposition. Automated
+6. New READMEs, material README/navigation changes, and publication/portfolio
+   reviews use [README-STANDARD.md](README-STANDARD.md): record the checklist,
+   readability rating and before/after disposition. Typo-only corrections do
+   not require a new full review. Automated
    docs checks alone do not establish readability; preserve essential limits
    and keep review paperwork out of the human entry.
 

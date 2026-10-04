@@ -1,6 +1,7 @@
 # README human readability standard
 
-Version: **1.0 candidate**, October 4, 2026. Owner: QA Kit maintainers.
+Version: **1.0**, adopted October 4, 2026 by Stephen Kall.
+Owner: QA Kit maintainers.
 
 Every Legume Labs README is a front door for its intended human reader.
 Someone unfamiliar with the repository should understand what it does, why
@@ -130,7 +131,7 @@ Required correction and recheck evidence:
 
 ## Rollout
 
-This is a central source candidate, not an assertion that every repo conforms.
+This is the adopted central standard, not an assertion that every repo conforms.
 Review each repo on its next material README change or publication assessment;
 do not rewrite the fleet automatically. First repair the Legume Labs entry,
 then prioritize intended featured repos. Code-only changes with no entry/claim
