@@ -1,5 +1,7 @@
 # Repository scorecard candidate
 Status: **review only; no runtime consumer or activation**
+
+An unwired [offline evaluator slice](SCORECARD-EVALUATOR.md) now executes the nine Health examples and normalized Security status tests. It does not activate this policy or complete the pilot.
 Candidate version: 1.0.0-draft.1
 
 This proposal adds reproducible Health and Security reporting alongside existing publication and hiring measures. It does not modify PORTFOLIO-READINESS.md, reporting-policy.json, manifest.json, workflows, gates, schedules, credentials, databases or deployments. Approval of this draft is separate from runtime adoption. Machine-readable proposal: [policy](scorecards/policy.candidate.json). Review cases: [fixtures](scorecards/acceptance-cases.json); these are specifications, not runtime evaluator tests. A repository contract test checks that the disabled proposal and the nine Health fixture expectations remain internally consistent.
@@ -79,7 +81,7 @@ Start with qa-kit and gate-kit using synthetic, private or approved-safe evidenc
 
 The JSON fixtures provide nine Health boundary cases and integration acceptance requirements. The repository contract test checks the proposed arithmetic, status order and replay/activation invariants; it does not execute a scorer, database adapter, scanner or UI. A later implementation must convert the integration requirements to executable tests covering idempotency/conflicts, stale and missing evidence, report-only scanner findings, policy changes, out-of-order delivery, privacy, quota failure, current projection recovery and execution isolation. Validate UI repeat/refresh/error states and relevant repository aggregate checks. An empty or unknown baseline is preferable to invented scores.
 
-The candidate contains no evaluator, database adapter, installed scanner, schedule or UI implementation. Do not call the system implemented after merging configuration alone.
+The candidate policy activates no evaluator. The separate offline evaluator slice has no database adapter, installed scanner, schedule or UI implementation. Do not call the system implemented after merging configuration alone.
 
 ## Review instructions
 Review this branch independently, inspect repository rules and canonical portfolio policy, and run required repo checks in an authorized environment. Report exact commit, commands, pass/fail/skip, findings and limits. Do not merge, deploy, provision, start services or enable recurring work without separate approval. Preserve concurrent work and scope changes to this proposal. Return a concise decision and implementation sequence for the owner.

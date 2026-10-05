@@ -1,0 +1,25 @@
+test_bad_ratings_refused (test_scorecard_evaluator.EvaluatorTests.test_bad_ratings_refused) ... ok
+test_boolean_complete_required (test_scorecard_evaluator.EvaluatorTests.test_boolean_complete_required) ... ok
+test_complete_scan_green (test_scorecard_evaluator.EvaluatorTests.test_complete_scan_green) ... ok
+test_critical_blocker_red_despite_missing (test_scorecard_evaluator.EvaluatorTests.test_critical_blocker_red_despite_missing) ... ok
+test_duplicate_producer_rejected_not_cherry_picked (test_scorecard_evaluator.EvaluatorTests.test_duplicate_producer_rejected_not_cherry_picked) ... ok
+test_empty_security_unknown (test_scorecard_evaluator.EvaluatorTests.test_empty_security_unknown) ... ok
+test_exact_quarter_points (test_scorecard_evaluator.EvaluatorTests.test_exact_quarter_points) ... ok
+test_existing_nine_cases_execute_real_evaluator (test_scorecard_evaluator.EvaluatorTests.test_existing_nine_cases_execute_real_evaluator) ... ok
+test_failed_scan_unknown (test_scorecard_evaluator.EvaluatorTests.test_failed_scan_unknown) ... ok
+test_incomplete_rating_cannot_earn_credit (test_scorecard_evaluator.EvaluatorTests.test_incomplete_rating_cannot_earn_credit) ... ok
+test_missing_rating_cannot_be_complete (test_scorecard_evaluator.EvaluatorTests.test_missing_rating_cannot_be_complete) ... ok
+test_missing_with_finding_amber_incomplete (test_scorecard_evaluator.EvaluatorTests.test_missing_with_finding_amber_incomplete) ... ok
+test_no_implicit_freshness_policy (test_scorecard_evaluator.EvaluatorTests.test_no_implicit_freshness_policy) ... ok
+test_no_required_scope_not_green (test_scorecard_evaluator.EvaluatorTests.test_no_required_scope_not_green) ... ok
+test_policy_unchanged (test_scorecard_evaluator.EvaluatorTests.test_policy_unchanged) ... ok
+test_report_only_success_does_not_hide_finding (test_scorecard_evaluator.EvaluatorTests.test_report_only_success_does_not_hide_finding) ... ok
+test_security_does_not_fabricate_native_score (test_scorecard_evaluator.EvaluatorTests.test_security_does_not_fabricate_native_score) ... ok
+test_stale_findings_remain_visible (test_scorecard_evaluator.EvaluatorTests.test_stale_findings_remain_visible) ... ok
+test_stale_future_wrong_commit_scope_missing_version_unknown (test_scorecard_evaluator.EvaluatorTests.test_stale_future_wrong_commit_scope_missing_version_unknown) ... ok
+test_unknown_blocker_refused (test_scorecard_evaluator.EvaluatorTests.test_unknown_blocker_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.002s
+
+OK
