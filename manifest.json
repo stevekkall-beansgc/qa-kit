@@ -247,10 +247,9 @@
       "e2e": {
         "cmd": [
           "python3",
-          "scripts/scan_jobs.py",
-          "--plan"
+          "scripts/run_e2e.py"
         ],
-        "note": "Owned offline scanner/configuration smoke; public ATS availability is validated operationally because release QA must remain deterministic and credential-free."
+        "note": "Owned offline scanner/configuration smoke plus private application-list loopback downloads and browser-state regressions. Merge the paired private source entrypoint before this registration. Public ATS availability is validated operationally; release QA remains deterministic and credential-free."
       },
       "github": "job-search"
     },
