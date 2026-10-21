@@ -32,8 +32,8 @@ The companion record has exactly `schema`, `target`, `receipts`, `scope`,
 
 `target` binds repository, exact commit, tracked tree digest, source-path Git blob
 identities, dependency snapshots, control identities and selection. `expected`
-is a separately reviewed caller input with exactly `target`, `required_cells`
-and `required_scope`. The caller must establish it from authoritative source and
+is a separately reviewed caller input with exactly `target`, `required_cells`,
+`required_scope`, and `known_findings`. The caller must establish it from authoritative source and
 controls. It must not adopt the audited record's own claims as expected truth.
 Source blobs are compared to that binding; this tool does not read repositories
 to authenticate blobs, timestamps, authorship or freshness itself.
@@ -60,12 +60,17 @@ and counterevidence; rejection without counterevidence reports unverified.
 Independent-review corroboration binds distinct author/reviewer IDs and the exact
 record digest; a different ID or bare declaration is insufficient.
 
-Known finding IDs persist through absent/narrower scans and accepted exceptions.
+The caller-held `expected.known_findings` are unioned with record-declared IDs,
+so omitting an old finding from the new record does not erase it. Known finding
+IDs persist through absent/narrower scans and accepted exceptions.
 A separately supplied remediation must bind the exact target and finding, identify
 fix and verification evidence digests, declare outcome `remediated` and retain
 caller qualification of its reviewer. This is accounting of supplied review, not a
 clearance writer or a substitute for Core17's qualified normalization/ingestion.
-No finding is deleted and an exception never becomes remediation automatically.
+Source-mismatched records cannot confirm findings or apply remediation to the
+expected target. A receipt with a failed/blocked task cannot contribute covered
+cells even if its top-level status says pass. No finding is deleted and an
+exception never becomes remediation automatically.
 
 ## Evidence handling and limits
 
