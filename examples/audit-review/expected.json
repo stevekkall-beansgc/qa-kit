@@ -29,5 +29,6 @@
   ],
   "required_scope": [
     "native-capture"
-  ]
+  ],
+  "known_findings": []
 }

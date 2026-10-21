@@ -21,7 +21,7 @@ class AuditReviewTests(unittest.TestCase):
                        'dependencies': {'fixture': identity}, 'controls': {'qa': identity},
                        'selection': 'ci-required'}
         self.expected = {'target': copy.deepcopy(self.target), 'required_cells': ['unit@host'],
-                         'required_scope': ['native-capture']}
+                         'required_scope': ['native-capture'], 'known_findings': []}
         self.receipt = {'schema': 'qa-kit.validation-result/v1', 'github_repository': 'synthetic/product',
                         'candidate': {'before': identity, 'after': identity},
                         'fixtures': {'fixture': {'before': identity, 'after': identity}},
@@ -151,6 +151,34 @@ class AuditReviewTests(unittest.TestCase):
         self.assertIn('receipt_unavailable_or_changed', r['problems'])
         self.receipt['tasks'] *= 2
         with self.assertRaises(ValueError): self.run_review()
+
+    def test_caller_known_findings_survive_record_omission(self):
+        self.expected['known_findings'] = ['F1']
+        self.record['known_findings'] = []
+        r = self.run_review()
+        self.assertEqual(r['unresolved_known_findings'], ['F1'])
+        self.assertIn('known_finding_absent_scope_review', r['problems'])
+
+    def test_failed_prerequisite_cannot_hide_behind_passing_receipt(self):
+        self.receipt['tasks'].insert(0, {'task': 'setup', 'variant': 'host',
+                                        'status': 'fail', 'exit_code': 7})
+        r = self.run_review()
+        self.assertEqual(r['covered_cells'], [])
+        self.assertIn('execution_failed_or_incomplete', r['problems'])
+
+    def test_wrong_record_source_cannot_confirm_or_clear_expected_findings(self):
+        f = self.finding()
+        self.record['known_findings'] = ['F1']
+        self.verification['reproductions'][self.ref] = {'target': self.target,
+            'finding': audit.digest({k: v for k, v in f.items() if k != 'reproduction'}),
+            'outcome': 'confirmed'}
+        self.verification['remediations']['F1'] = {'target': self.target, 'finding': 'F1',
+            'outcome': 'remediated', 'fix_evidence': self.ref, 'verification_evidence': self.ref,
+            'qualified_reviewer': True}
+        self.record['target']['repository'] = 'synthetic/foreign'
+        r = self.run_review()
+        self.assertEqual(r['findings'][0]['status'], 'unverified')
+        self.assertEqual(r['unresolved_known_findings'], ['F1'])
 
     def test_malformed_target_identity_refuses(self):
         self.expected['target']['commit'] = 'mutable-main'

@@ -67,7 +67,7 @@ def review(record, expected, receipts, verification):
     """
     fields(record, 'schema target receipts scope findings known_findings exceptions review')
     require(record['schema'] == SCHEMA)
-    fields(expected, 'target required_cells required_scope')
+    fields(expected, 'target required_cells required_scope known_findings')
     target_identity(record['target'])
     target_identity(expected['target'])
     target = expected['target']
@@ -76,8 +76,10 @@ def review(record, expected, receipts, verification):
     require(isinstance(receipts, dict) and isinstance(verification, dict))
     fields(verification, 'reproductions independence remediations')
     require(all(isinstance(verification[k], dict) for k in verification))
+    expected_known = ids(expected['known_findings'])
+    target_matches = record['target'] == target
     problems = set(); covered = set(); tasks = []; findings = []; held = 0
-    if record['target'] != expected['target']:
+    if not target_matches:
         problems.add('target_or_source_mismatch')
     refs = record['receipts']; require(isinstance(refs, list) and all(reference(x) for x in refs))
     require(len(refs) == len(set(refs)))
@@ -122,7 +124,8 @@ def review(record, expected, receipts, verification):
                 state = 'fail'
             statuses[cell] = state
             tasks.append({'cell': cell, 'status': state, 'receipt': ref})
-        if receipt.get('status') != 'pass' or receipt.get('errors'):
+        if receipt.get('status') != 'pass' or receipt.get('errors') or any(
+                state != 'pass' for state in statuses.values()):
             problems.add('execution_failed_or_incomplete')
         elif all(statuses.get(cell) == 'pass' for cell in selected):
             covered |= selected
@@ -155,7 +158,7 @@ def review(record, expected, receipts, verification):
         held += sum(not reference(r) for r in [*row['evidence'], *row['counterevidence']])
         reproduction = verification['reproductions'].get(row['reproduction'])
         # Reproduction binds the entire claim, exact target and exact evidence.
-        reproduced = (reference(row['reproduction']) and reproduction == {
+        reproduced = (target_matches and reference(row['reproduction']) and reproduction == {
             'target': expected['target'], 'finding': digest({k: v for k, v in row.items()
                                                            if k != 'reproduction'}), 'outcome': state})
         held += not reference(row['reproduction'])
@@ -166,13 +169,13 @@ def review(record, expected, receipts, verification):
         findings.append({'id': row['id'], 'status': state,
                          'evidence': [r for r in row['evidence'] if reference(r)],
                          'counterevidence': [r for r in row['counterevidence'] if reference(r)]})
-    current_ids = ids(finding_ids); known = ids(record['known_findings'])
+    current_ids = ids(finding_ids); known = expected_known | ids(record['known_findings'])
     unresolved = set(known)
     # A missing known finding is never clearance. Only a separate scoped verified
     # remediation supplied by the caller can mark it remediated in this report.
     for key in known:
         remediation = verification['remediations'].get(key, {})
-        if (isinstance(remediation, dict) and remediation.get('target') == expected['target']
+        if (target_matches and isinstance(remediation, dict) and remediation.get('target') == expected['target']
                 and remediation.get('finding') == key and remediation.get('outcome') == 'remediated'
                 and reference(remediation.get('fix_evidence'))
                 and reference(remediation.get('verification_evidence'))
