@@ -1,0 +1,34 @@
+{
+  "target": {
+    "repository": "synthetic/product",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_blobs": {
+      "app.py": "cccccccccccccccccccccccccccccccccccccccc"
+    },
+    "dependencies": {
+      "fixture": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "controls": {
+      "qa": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "selection": "ci-required"
+  },
+  "required_cells": [
+    "unit@host"
+  ],
+  "required_scope": [
+    "native-capture"
+  ],
+  "known_findings": []
+}

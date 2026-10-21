@@ -1,0 +1,63 @@
+{
+  "sha256:99b18004782a74a9e97eee2d4d2c848371a1030339ab77888cbbbb98d1040ae8": {
+    "schema": "qa-kit.validation-result/v1",
+    "github_repository": "synthetic/product",
+    "candidate": {
+      "before": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      },
+      "after": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "fixtures": {
+      "fixture": {
+        "before": {
+          "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "dirty": false,
+          "matches_head": true
+        },
+        "after": {
+          "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "dirty": false,
+          "matches_head": true
+        }
+      }
+    },
+    "controls": {
+      "qa": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "variant": "host",
+    "selection": "ci-required",
+    "required": [
+      "unit@host"
+    ],
+    "selected": [
+      "unit@host"
+    ],
+    "status": "pass",
+    "errors": [],
+    "tasks": [
+      {
+        "task": "unit",
+        "variant": "host",
+        "status": "pass",
+        "exit_code": 0,
+        "timed_out": false
+      }
+    ]
+  }
+}
