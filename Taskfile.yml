@@ -8,4 +8,3 @@ tasks:
         msg: Python 3.12 must be available as python3
     cmds:
       - CI=true bash bin/qa_selfcheck.sh
-      - python3 scripts/check_stdlib.py bin/

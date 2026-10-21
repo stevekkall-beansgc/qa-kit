@@ -12,7 +12,7 @@ class TaskEntrypoint(unittest.TestCase):
         self.assertIn("version: '3'", taskfile)
         self.assertIn('sys.version_info[:2] != (3, 12)', taskfile)
         self.assertIn('      - CI=true bash bin/qa_selfcheck.sh\n', taskfile)
-        self.assertIn('      - python3 scripts/check_stdlib.py bin/\n', taskfile)
+        self.assertIn('python3 scripts/check_stdlib.py bin/\n', (ROOT / 'bin/qa_selfcheck.sh').read_text())
         self.assertNotIn('run_all.py', taskfile)
         self.assertNotIn('ignore_error', taskfile)
 

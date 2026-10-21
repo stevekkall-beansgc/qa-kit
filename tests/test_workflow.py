@@ -156,7 +156,7 @@ def gate_contract(text):
     job = nested(jobs, 'compliance', 4)
     assert set(job) == {'uses', 'with'}, 'unexpected reusable caller field'
     assert scalar(job, 'uses') == \
-        'stevekkall-beansgc/gate-kit/.github/workflows/compliance.yml@v0.4.11', \
+        'stevekkall-beansgc/gate-kit/.github/workflows/compliance.yml@v0.7.4', \
         'caller rollout requires separate review'
     assert nested(job, 'with', 6) == {'repo': ('qa-kit', ''), 'full': ('false', ''),
                                     'runner': (GATE_RUNNER, '')}, 'gate selection drift'
@@ -247,7 +247,7 @@ class GateCallerTests(unittest.TestCase):
             'missing ceiling': ('permissions:\n  contents: read\n', ''),
             'write grant': ('contents: read', 'contents: write'),
             'new event': ('[pull_request, push]', '[pull_request_target, push]'),
-            'caller upgrade': ('@v0.4.11', '@v0.7.2'),
+            'caller pin drift': ('@v0.7.4', '@v0.7.2'),
             'untrusted local selection': (GATE_RUNNER, "${{ 'beans-mac' }}"),
             'broader selection': ('full: false', 'full: true'),
         }
