@@ -1,0 +1,57 @@
+{
+  "schema": "qa-kit.audit-review/v1",
+  "target": {
+    "repository": "synthetic/product",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_blobs": {
+      "app.py": "cccccccccccccccccccccccccccccccccccccccc"
+    },
+    "dependencies": {
+      "fixture": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "controls": {
+      "qa": {
+        "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tracked_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dirty": false,
+        "matches_head": true
+      }
+    },
+    "selection": "ci-required"
+  },
+  "receipts": [
+    "sha256:99b18004782a74a9e97eee2d4d2c848371a1030339ab77888cbbbb98d1040ae8"
+  ],
+  "scope": [
+    {
+      "id": "native-capture",
+      "status": "unavailable",
+      "evidence": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "reason": "synthetic inspection"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "status": "confirmed",
+      "evidence": [
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "counterevidence": [],
+      "reproduction": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "known_findings": [],
+  "exceptions": [],
+  "review": {
+    "author": "author",
+    "reviewer": "reviewer",
+    "independence_evidence": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}
