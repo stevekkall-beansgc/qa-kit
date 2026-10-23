@@ -140,7 +140,7 @@ class ReportingIntegrity(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);state=root/'state.json';manifest=root/'manifest.json'
             manifest.write_text(json.dumps({'repos':[{'name':'one','path':directory}]}))
-            inflight=[{'databaseId':9,'status':'in_progress','conclusion':'','url':'url'}]
+            inflight=[{'databaseId':9,'attempt':1,'status':'in_progress','conclusion':'','url':'url'}]
             with mock.patch.object(ci_monitor,'STATE',state),mock.patch.object(ci_monitor,'MANIFEST',manifest),mock.patch.object(ci_monitor,'repo_remote',return_value=('remote','url')),mock.patch.object(ci_monitor,'gh',side_effect=[(0,''),(0,json.dumps(inflight))]),contextlib.redirect_stdout(io.StringIO()):
                 ci_monitor.main()
             self.assertEqual(json.loads(state.read_text())['repos']['one']['last_run_id'],0)

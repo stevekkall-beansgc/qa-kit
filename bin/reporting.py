@@ -89,7 +89,15 @@ def normalize_state(raw, names):
         old = rows.get(name, {})
         old = old if isinstance(old, dict) else {}
         value = old.get('last_run_id', 0)
+        runs = old.get('runs', {})
+        runs = runs if isinstance(runs, dict) else {}
+        runs = {key: {'attempt': row['attempt'], 'conclusion': row['conclusion']}
+                for key, row in runs.items()
+                if isinstance(key, str) and key.isascii() and key.isdecimal() and int(key) > 0
+                and isinstance(row, dict) and type(row.get('attempt')) is int
+                and row['attempt'] > 0 and isinstance(row.get('conclusion'), str)}
         normalized[name] = {'last_run_id': value if isinstance(value, int) and not isinstance(value, bool) else 0,
+                            'runs': runs,
                             'state': old.get('state', 'unknown'),
                             'verified': old.get('verified')}
     return {'schema_version': 2, 'contract_version': CONTRACT_VERSION,
@@ -107,7 +115,8 @@ def valid_runs(runs, *, monitor=False):
         if not isinstance(r.get('conclusion'), str) and not (
             r.get('conclusion') is None and r.get('status') in ('queued','in_progress','waiting','requested','pending')):
             return False
-        if monitor and (not isinstance(r.get('databaseId'), int) or isinstance(r['databaseId'], bool)):
+        if monitor and (type(r.get('databaseId')) is not int or r['databaseId'] <= 0
+                        or type(r.get('attempt')) is not int or r['attempt'] <= 0):
             return False
     return True
 

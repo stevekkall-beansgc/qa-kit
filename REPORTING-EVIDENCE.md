@@ -71,14 +71,28 @@ that proof; a single successful workflow never qualifies the entire CI lane.
 `ci-state.json` schema 2 separates `attempted` from `verified`. `verified` means
 the eligible repository queries completed successfully, not that tests passed.
 Each registered repository has its current state, last verified time and
-completed-run watermark. Legacy wrapper keys are removed; legacy `checked`
-timestamps migrate as attempts only. Authentication/API/malformed responses are
+observed run identities with their latest attempt and terminal conclusion (an
+empty conclusion means unfinished). The completed-run watermark remains for
+compatibility, but does not suppress alerts. Legacy wrapper keys are removed;
+legacy `checked` timestamps migrate as attempts only. Authentication/API/malformed responses are
 unknown and fail the monitor. Missing repositories are unknown. Local-only,
 no-runs, queued and running states never count as successful CI.
 
 Git resolves remotes for both ordinary repositories and linked worktrees.
-In-flight runs do not advance the completed-run watermark, so a later failure
-of the same run is still detected. Writes replace the state atomically.
+Completion order does not determine delivery: an older run can fail after a
+newer success and still alert. Each failed attempt alerts once; a retry's new
+attempt can alert again. Unfinished runs that leave the recent eight-run window
+are queried individually until complete. A failed follow-up query preserves
+that outstanding identity and leaves coverage unknown. Known new failures are
+printed even when another query fails. Writes replace the state atomically.
+
+On the first poll of legacy state, the recent window is evaluated once: the old
+watermark cannot prove which failures were reported. Some historical failures
+may therefore alert again during adoption. Already observed identities remain
+in state to prevent subsequent duplicate alerts. This is still a recent-run
+monitor, not an exhaustive GitHub audit: runs and retries never returned by a
+poll are outside its coverage. Source validation uses synthetic responses and
+temporary state; it does not run or change the live monitor.
 
 ## Backup evidence
 

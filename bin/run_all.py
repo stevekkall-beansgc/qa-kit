@@ -27,6 +27,7 @@ import time
 import os
 import platform
 import hashlib
+import signal
 from datetime import datetime, timezone
 from pathlib import Path
 from reporting import CONTRACT_VERSION, identity
@@ -63,6 +64,21 @@ def expand(path):
     return Path(path).expanduser()
 
 
+def stop_check(process):
+    """Stop the check's own process group, even if its direct child has exited."""
+    if os.name == 'posix':
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    elif process.poll() is None:
+        process.kill()
+    # Reap only the direct child. A detached descendant may still hold the
+    # output pipes open; draining them would defeat the timeout. The Popen
+    # context closes our pipe handles without waiting for descendant EOF.
+    process.wait()
+
+
 def run_repo(repo, kind):
     spec = repo.get(kind)
     if not spec or not spec.get("cmd"):
@@ -70,20 +86,27 @@ def run_repo(repo, kind):
     cwd = expand(repo["path"])
     env = None
     if spec.get("env"):
-        import os
         env = dict(os.environ)
         for k, v in spec["env"].items():
             # Relative paths (e.g. PYTHONPATH=src) resolve against the repo.
             env[k] = str(cwd / v) if not v.startswith("/") else v
     t0 = time.monotonic()
     try:
-        proc = subprocess.run(
+        with subprocess.Popen(
             spec["cmd"], cwd=str(cwd), env=env,
-            capture_output=True, text=True, timeout=TIMEOUT_SECS,
-        )
-        ok, out = proc.returncode == 0, (proc.stdout + "\n" + proc.stderr)[-1200:]
-    except subprocess.TimeoutExpired:
-        ok, out = False, f"TIMEOUT after {TIMEOUT_SECS}s"
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            start_new_session=(os.name == 'posix'),
+        ) as proc:
+            try:
+                stdout, stderr = proc.communicate(timeout=TIMEOUT_SECS)
+            except subprocess.TimeoutExpired:
+                stop_check(proc)
+                ok, out = False, f"TIMEOUT after {TIMEOUT_SECS}s"
+            except BaseException:
+                stop_check(proc)
+                raise
+            else:
+                ok, out = proc.returncode == 0, (stdout + "\n" + stderr)[-1200:]
     except FileNotFoundError as e:
         ok, out = False, f"entrypoint missing: {e}"
     return {"repo": repo["name"], "kind": kind, "ok": ok,
