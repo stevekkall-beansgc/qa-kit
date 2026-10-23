@@ -2,8 +2,9 @@
 """ci_monitor.py — watch GitHub Actions across every registered repo.
 
 For each manifest repo WITH a remote: list recent runs on main; flag any
-conclusion=failure newer than the last-seen watermark. State lives in
-qa-kit/logs/ci-state.json so repeated runs only surface NEW failures.
+newly observed failed run attempt, following unfinished runs until completion.
+State lives in qa-kit/logs/ci-state.json so repeated polls deduplicate failures
+by run identity and attempt, independent of creation/completion order.
 Separates query coverage from test verdicts. Local-only/no-runs states are
 known observations, never successful CI. Auth/API/schema failures are unknown.
 
@@ -27,6 +28,7 @@ HERE = Path(__file__).resolve().parent.parent
 MANIFEST = HERE / "manifest.json"
 STATE = HERE / "logs" / "ci-state.json"
 OWNER = "stevekkall-beansgc"
+RUN_FIELDS = "databaseId,attempt,workflowName,conclusion,displayTitle,createdAt,url,status"
 
 
 def expand(p):
@@ -83,8 +85,7 @@ def main():
         gh_name = repo.get("github", name)
         rc, out = gh(["run", "list", "--repo", f"{OWNER}/{gh_name}",
                       "--branch", "main", "--limit", "8",
-                      "--json", "databaseId,workflowName,conclusion,"
-                      "displayTitle,createdAt,url,status"])
+                      "--json", RUN_FIELDS])
         if rc != 0:
             infos.append(f"{name}: gh query failed; coverage unknown")
             query_failures.append(name)
@@ -96,24 +97,50 @@ def main():
         if not valid_runs(runs, monitor=True):
             query_failures.append(f'{name}: malformed/unavailable run response')
             continue
-        seen['state'], _, _ = ci_verdict(runs)
-        seen['verified'] = stamp
-        last_id = seen.get("last_run_id", 0)
+        recent_state, _, _ = ci_verdict(runs)
+        observed = seen['runs']
+        listed_ids = {str(r['databaseId']) for r in runs}
+        pending_query_failed = False
+        # A busy repository may push an unfinished run out of the recent eight.
+        # Keep following that identity rather than silently dropping its result.
+        for run_id, previous in observed.items():
+            if previous['conclusion'] or run_id in listed_ids:
+                continue
+            rc, out = gh(['run', 'view', run_id, '--repo', f'{OWNER}/{gh_name}',
+                          '--json', RUN_FIELDS])
+            try:
+                pending = json.loads(out) if rc == 0 else None
+            except (TypeError, ValueError):
+                pending = None
+            if not valid_runs([pending], monitor=True) or str(pending['databaseId']) != run_id:
+                query_failures.append(f'{name}: pending run {run_id} unavailable/malformed')
+                pending_query_failed = True
+                continue
+            runs.append(pending)
+        if not pending_query_failed:
+            seen['state'] = recent_state
+            seen['verified'] = stamp
         for r in sorted(runs, key=lambda x: x["databaseId"]):
-            if r.get('status') and r['status'] != 'completed':
+            run_id = str(r['databaseId'])
+            previous = observed.get(run_id)
+            # A retry reuses the run ID, while stale responses must not rewind it.
+            if previous and (r['attempt'] < previous['attempt'] or (
+                    r['attempt'] == previous['attempt'] and previous['conclusion'])):
                 continue
-            if not r['conclusion']:
-                continue
-            if r["databaseId"] <= last_id:
+            terminal = (not r.get('status') or r['status'] == 'completed') and bool(r['conclusion'])
+            observed[run_id] = {'attempt': r['attempt'],
+                                'conclusion': r['conclusion'] if terminal else ''}
+            if not terminal:
                 continue
             if r["conclusion"] == "failure":
                 new_failures.append({
                     "repo": name, "run_id": r["databaseId"],
+                    "attempt": r['attempt'],
                     "workflow": r.get("workflowName"), "title": str(r.get("displayTitle",''))[:90],
                     "url": r.get("url"),
                 })
-            state.setdefault(name, {})["last_run_id"] = max(
-                r["databaseId"], state.get(name, {}).get("last_run_id", 0))
+            # Retain the old field for readers, but never use it for deduplication.
+            seen['last_run_id'] = max(r['databaseId'], seen['last_run_id'])
 
     if auth_verified and not query_failures:
         wrapper['verified'] = stamp
@@ -135,13 +162,13 @@ def main():
         print(f"\nMONITOR FAILURE (auth_verified={str(auth_verified).lower()}):")
         for failure in query_failures:
             print(f"  ✗ {failure}")
-        sys.exit(1)
     if new_failures:
         print(f"\nNEW FAILURES ({len(new_failures)}):")
         for f in new_failures:
-            print(f"  ✗ [{f['repo']}] {f['workflow']}: {f['title']}")
+            print(f"  ✗ [{f['repo']}] {f['workflow']}: {f['title']} (attempt {f['attempt']})")
             print(f"      {f['url']}")
         print("auth_verified=true")
+    if query_failures or new_failures:
         sys.exit(1)
     print("query coverage verified — auth_verified=true; no new failures since last sweep; this is not a fleet CI pass")
 
