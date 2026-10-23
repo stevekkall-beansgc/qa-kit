@@ -73,8 +73,10 @@ def stop_check(process):
             pass
     elif process.poll() is None:
         process.kill()
-    # Drain/close inherited pipes and reap the direct child before returning.
-    process.communicate()
+    # Reap only the direct child. A detached descendant may still hold the
+    # output pipes open; draining them would defeat the timeout. The Popen
+    # context closes our pipe handles without waiting for descendant EOF.
+    process.wait()
 
 
 def run_repo(repo, kind):

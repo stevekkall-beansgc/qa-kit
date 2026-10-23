@@ -52,6 +52,32 @@ class LegacyProcessCleanup(unittest.TestCase):
     def test_timeout_stops_child_even_after_parent_exited(self):
         self.assert_timeout_stops_descendant(parent_exits=True)
 
+    def test_detached_child_cannot_extend_timeout_by_holding_output_pipes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'parent.py').write_text(
+                "import pathlib,subprocess,sys,time\n"
+                "subprocess.Popen([sys.executable,'-c','import time; time.sleep(3)'],"
+                "start_new_session=True)\n"
+                "pathlib.Path('spawned').touch()\n"
+                "time.sleep(5)\n")
+            row = {'name': 'fixture', 'path': str(root),
+                   'unit': {'cmd': [sys.executable, 'parent.py']}}
+            started = time.monotonic()
+            try:
+                with mock.patch.object(run_all, 'TIMEOUT_SECS', 0.5):
+                    result = run_all.run_repo(row, 'unit')
+                elapsed = time.monotonic() - started
+                self.assertTrue((root / 'spawned').exists())
+                self.assertFalse(result['ok'])
+                self.assertEqual(result['tail'], 'TIMEOUT after 0.5s')
+                self.assertLess(elapsed, 2,
+                                'timeout cleanup must not wait for a detached child to close pipes')
+            finally:
+                # The intentionally detached fixture is outside the check's group;
+                # it exits independently before this temporary directory is removed.
+                time.sleep(max(0, started + 3.5 - time.monotonic()))
+
 
 if __name__ == '__main__':
     unittest.main()
