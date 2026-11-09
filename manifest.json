@@ -458,6 +458,34 @@
         ],
         "note": "Owned local SQLite billing and legacy CLI subprocess tests. No PostgreSQL, reserved-resource completion, hosted service or independent-acceptance claim."
       }
+    },
+    {
+      "name": "bean-fleet",
+      "path": "~/beans/platform/bean-fleet",
+      "tier": "B",
+      "status": "active",
+      "setup": {
+        "cmd": [
+          "python3",
+          "scripts/setup_qa.py"
+        ],
+        "note": "Governed profile provisions public dependencies; setup verifies exact attributed vendored Commons v0.3.9 source before local --no-deps install, never PyPI private-name resolution"
+      },
+      "unit": {
+        "cmd": [
+          "python3",
+          "scripts/check.py",
+          "unit"
+        ]
+      },
+      "e2e": {
+        "cmd": [
+          "python3",
+          "scripts/check.py",
+          "e2e"
+        ],
+        "note": "Owned local host + injected provider + signed software grant end-to-end; no live providers"
+      }
     }
   ]
 }
