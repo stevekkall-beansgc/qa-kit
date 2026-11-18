@@ -486,6 +486,30 @@
         ],
         "note": "Owned local host + injected provider + signed software grant end-to-end; no live providers"
       }
+    },
+    {
+      "name": "savvy-proto",
+      "path": "/Users/stephenkall/beans/labs/savvy-medallion-development",
+      "tier": "A",
+      "status": "active",
+      "unit": {
+        "cmd": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-q"
+        ]
+      },
+      "e2e": {
+        "cmd": [
+          "bash",
+          "scripts/release-domain-check.sh"
+        ],
+        "note": "Owned isolated PostgreSQL/Rails integration for the single billing engine, native lifecycle and worker. Browser and dbt acceptance also run in Savvy Prototype checks; the gate does not claim production throughput or live integrations."
+      }
     }
   ]
 }
